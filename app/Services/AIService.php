@@ -175,6 +175,16 @@ class AIService
                 ];
             }
 
+            // Get error message to check if it's quota related
+            $errorBody = $response->json();
+            $errorMessage = $errorBody['error']['message'] ?? '';
+            $isQuotaError = $this->isQuotaExceededError($errorMessage);
+
+            // If quota exceeded, stop trying immediately (won't work with other models either)
+            if ($isQuotaError) {
+                break;
+            }
+
             // Only retry on 429 or 404, not on other errors
             if ($response->status() !== 429 && $response->status() !== 404) {
                 break;
@@ -191,6 +201,27 @@ class AIService
             'status' => $lastResponse ? $lastResponse->status() : 500,
             'error' => $errorBody['error']['message'] ?? 'Unknown error'
         ];
+    }
+
+    /**
+     * Check if error is quota exceeded (simple check)
+     */
+    private function isQuotaExceededError(string $errorMessage): bool
+    {
+        if (empty($errorMessage)) {
+            return false;
+        }
+
+        $quotaKeywords = ['quota', 'Quota exceeded', 'exceeded your current quota'];
+        $lowerMessage = strtolower($errorMessage);
+
+        foreach ($quotaKeywords as $keyword) {
+            if (stripos($lowerMessage, strtolower($keyword)) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
