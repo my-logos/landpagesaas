@@ -1,0 +1,28 @@
+/**
+ * Email Templates Styles
+ * Styles for email templates
+ */
+
+.email-content {
+    font-family: sans-serif;
+    line-height: 1.6;
+    color: #17233d;
+}
+
+.email-content h2 {
+    color: #17233d;
+    margin-bottom: 16px;
+}
+
+.email-content p {
+    margin-bottom: 12px;
+}
+
+.email-content a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.email-content a:hover {
+    text-decoration: underline;
+}

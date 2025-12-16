@@ -1,0 +1,482 @@
+/* User Modals Styles */
+
+/* Modal Overlay - Base styles in user-common.css, override here for modals */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+/* Modal Container */
+.modal-container {
+    background: white;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Create Link Modal Specific */
+
+/* Current Links Section */
+#currentLinksSection {
+    display: none;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+#currentLinksSection.show {
+    display: block;
+}
+
+.current-links-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.current-links-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-hide-links {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-hide-links:hover {
+    color: #374151;
+}
+
+#linksList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.link-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+}
+
+.link-url {
+    color: #374151;
+    font-family: monospace;
+}
+
+.btn-copy-link {
+    background: #3b82f6;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copy-link:hover {
+    background: #2563eb;
+}
+
+/* Link Creation Form */
+.link-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.link-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.link-form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.step-number {
+    background: #3b82f6;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.link-form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.link-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Naming Requirements */
+.naming-requirements {
+    background: #fef3c7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-right: 4px solid #f59e0b;
+}
+
+.naming-requirements-content {
+    display: flex;
+    align-items: start;
+    gap: 10px;
+}
+
+.naming-requirements-icon {
+    color: #f59e0b;
+    margin-top: 2px;
+}
+
+.naming-requirements-title {
+    color: #92400e;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.naming-requirements-text {
+    color: #78350f;
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Custom Domains Section */
+.custom-domains-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.custom-domains-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.custom-domains-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.custom-domains-chevron {
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.custom-domains-description {
+    color: #6b7280;
+    margin-bottom: 15px;
+}
+
+.btn-link-domain {
+    background: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.btn-link-domain:hover {
+    background: #2563eb;
+}
+
+/* Tracking IDs Modal */
+.tracking-ids-description {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.tracking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tracking-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.tracking-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.tracking-form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.tracking-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tracking-form-input:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Feature Locked Styles for Tracking IDs */
+.tracking-form-group.feature-locked {
+    opacity: 0.7;
+}
+
+.tracking-form-group.feature-locked .tracking-form-input:disabled {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.feature-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+    text-transform: uppercase;
+}
+
+html[dir="rtl"] .feature-badge {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.tracking-form-label {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.form-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px;
+    background: #fef3c7;
+    border-radius: 6px;
+    color: #92400e;
+    font-size: 13px;
+}
+
+.form-warning i {
+    color: #f59e0b;
+    font-size: 14px;
+}
+
+/* Info Note */
+.info-note {
+    background: #eff6ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+}
+
+.info-note-icon {
+    color: #3b82f6;
+    margin-top: 2px;
+}
+
+.info-note-content {
+    flex: 1;
+}
+
+.info-note-text {
+    color: #1e40af;
+    margin: 0;
+    font-size: 14px;
+}
+
+.btn-info-details {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    margin-top: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+
+.btn-info-details:hover {
+    color: #2563eb;
+}
+
+/* Page Settings Modal */
+.settings-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.settings-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.settings-section-content {
+    flex: 1;
+}
+
+.settings-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-section-description {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+}
+
+.settings-section-note {
+    color: #6b7280;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Fixed Order Button Settings */
+#fixedOrderButtonSettings {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+}
+
+#fixedOrderButtonSettings.show {
+    display: block;
+}
+
+.button-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.button-setting-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-setting-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.button-setting-input,
+.button-setting-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.button-setting-input[type="color"] {
+    padding: 4px;
+    height: 40px;
+}
+
+.button-setting-input:focus,
+.button-setting-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .button-settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+

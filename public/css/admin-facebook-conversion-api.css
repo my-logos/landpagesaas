@@ -1,0 +1,176 @@
+/* Facebook Conversion API - Admin Page Styles */
+
+.pro-badge {
+    background: #FFD700;
+    color: #1f2b6b;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+}
+
+.dashboard-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.connection-status-box {
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid;
+}
+
+.connection-status-box.not-connected {
+    background: #FFE5E5;
+    border-color: #FF6B6B;
+}
+
+.connection-status-box.connected {
+    background: #E5F7E5;
+    border-color: #4CAF50;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.status-icon {
+    font-size: 3rem;
+}
+
+.connection-status-box.not-connected .status-icon {
+    color: #FF6B6B;
+}
+
+.connection-status-box.connected .status-icon {
+    color: #4CAF50;
+}
+
+.status-text {
+    flex: 1;
+}
+
+.status-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #1f2b6b;
+}
+
+.status-message {
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+}
+
+.settings-section {
+    margin-top: 2rem;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1f2b6b;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #1f2b6b;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #5561ff;
+    box-shadow: 0 0 0 3px rgba(85, 97, 255, 0.1);
+}
+
+.form-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: #E3F2FD;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #1976D2;
+}
+
+.form-info i {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: #1f2b6b;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    font-size: 1rem;
+    min-width: 150px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: #5561ff;
+    color: white;
+    box-shadow: 0 2px 4px rgba(85, 97, 255, 0.3);
+}
+
+.btn-primary:hover {
+    background: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(85, 97, 255, 0.4);
+}
+
