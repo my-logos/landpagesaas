@@ -1,5 +1,5 @@
 @php
-$templateCss = 'css/landing-games.css';
+$templateCss = 'landpage/css/landing-games.css';
 $additionalFonts = '
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@ $additionalFonts = '
     @include('landing-templates.partials.page-features')
     <!-- Top Banner -->
     <div class="top-banner">
-        {{ $page->additional_description ?? 'عرض حصري على الألعاب! احصل على خصم فوري، العرض محدود!' }}
+        {{ $page->additional_description ?? '' }}
     </div>
 
     <!-- Hero Section - Centered Colorful Design -->
@@ -28,8 +28,12 @@ $additionalFonts = '
                     <span>ألعاب حصرية</span>
                 </div>
                 <h1 class="hero-title-colorful">{{ $page->title ?? ($page->product->name ?? 'ألعاب رائعة') }}</h1>
+                @php
+                $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+                $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
+                @endphp
                 <p class="hero-description-colorful">
-                    {{ $page->content ?? ($page->product->description ?? 'استمتع بأفضل تجربة ألعاب مع مجموعتنا المميزة من الألعاب. جرافيكس عالية وأداء سلس.') }}
+                    {{ $heroDescription }}
                 </p>
                 @if($page->product)
                 <div class="pricing-colorful">
@@ -75,41 +79,36 @@ $additionalFonts = '
     </section>
 
     <!-- Features Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $features = $aiContent['features'] ?? [];
+    @endphp
+    @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
-            <h2 class="section-title">مميزات الألعاب</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
+                    @if(isset($feature['icon']))
                     <div class="feature-icon">
-                        <i class="fa-solid fa-tv"></i>
+                        <i class="{{ $feature['icon'] }}"></i>
                     </div>
-                    <h3 class="feature-title">جرافيكس متطورة</h3>
-                    <p class="feature-description">جرافيكس عالية الجودة تجعلك تعيش التجربة</p>
+                    @endif
+                    <h3 class="feature-title">{{ $feature['title'] ?? '' }}</h3>
+                    <p class="feature-description">{{ $feature['description'] ?? '' }}</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <h3 class="feature-title">لعب جماعي</h3>
-                    <p class="feature-description">استمتع باللعب مع أصدقائك عبر الإنترنت</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-trophy"></i>
-                    </div>
-                    <h3 class="feature-title">إنجازات ومكافآت</h3>
-                    <p class="feature-description">احصل على إنجازات ومكافآت حصرية</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-mobile-screen"></i>
-                    </div>
-                    <h3 class="feature-title">متعدد المنصات</h3>
-                    <p class="feature-description">متاح على جميع الأجهزة والمنصات</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Product Gallery Section -->
     @if($page->product && $page->product->images)
@@ -130,195 +129,33 @@ $additionalFonts = '
     </section>
     @endif
 
-    <!-- Product Details Section -->
-    <section class="product-details-section">
-        <div class="container">
-            <div class="product-details-content">
-                <div class="details-image">
-                    @if($page->product && $page->product->images)
-                    @if($detailImage)
-                    <img src="{{ $detailImage }}" alt="Product Details">
-                    @endif
-                    @endif
-                </div>
-                <div class="details-text">
-                    <h2 class="details-title">مميزات الألعاب</h2>
-                    <ul class="details-list">
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-palette"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>جرافيكس مذهلة</strong>
-                                <span>جرافيكس عالية الجودة تجعلك تعيش التجربة الحقيقية</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-wifi"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>لعب أونلاين</strong>
-                                <span>استمتع باللعب مع لاعبين من جميع أنحاء العالم</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-headset"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>دعم فني 24/7</strong>
-                                <span>فريق دعم فني متاح على مدار الساعة لمساعدتك</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-sync"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>تحديثات مستمرة</strong>
-                                <span>تحديثات دورية تضيف محتوى وميزات جديدة</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Choose Section -->
-    <section class="why-choose-section">
-        <div class="container">
-            <h2 class="section-title">لماذا نحن الأفضل؟</h2>
-            <div class="why-choose-grid">
-                <div class="why-choose-card">
-                    <div class="why-choose-number">01</div>
-                    <h3 class="why-choose-title">مجموعة ضخمة</h3>
-                    <p class="why-choose-description">آلاف الألعاب من جميع الأنواع والفئات</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">02</div>
-                    <h3 class="why-choose-title">أسعار مناسبة</h3>
-                    <p class="why-choose-description">أفضل الأسعار مع عروض وخصومات مستمرة</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">03</div>
-                    <h3 class="why-choose-title">تحميل فوري</h3>
-                    <p class="why-choose-description">احصل على الألعاب فوراً بعد الشراء</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">04</div>
-                    <h3 class="why-choose-title">ضمان الجودة</h3>
-                    <p class="why-choose-description">نضمن رضاك التام أو استرداد كامل المبلغ</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="container">
-            <h2 class="section-title">آراء اللاعبين</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-purple">ع</div>
-                        <div class="testimonial-info">
-                            <h4>عمر أحمد</h4>
-                            <p>(القاهرة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"أفضل موقع ألعاب تعاملت معه. الجودة عالية والأسعار معقولة. التحميل كان سريع جداً."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-pink">م</div>
-                        <div class="testimonial-info">
-                            <h4>مريم علي</h4>
-                            <p>(الجيزة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"خدمة رائعة ومجموعة ألعاب ضخمة. الجرافيكس مذهلة والأداء سلس. أنصح الجميع."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-cyan">ي</div>
-                        <div class="testimonial-info">
-                            <h4>يوسف محمود</h4>
-                            <p>(الإسكندرية)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"أفضل تجربة ألعاب. الدعم الفني ممتاز والتحديثات مستمرة. سأستمر في الشراء منهم."</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- FAQ Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $faqs = $aiContent['faqs'] ?? [];
+    @endphp
+    @if(!empty($faqs))
     <section class="faq-section">
         <div class="container">
-            <h2 class="section-title">أسئلة متكررة (FAQ)</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'أسئلة متكررة' : 'Frequently Asked Questions' }}</h2>
             <div class="faq-list">
+                @foreach($faqs as $faq)
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span>كيف يمكنني تحميل الألعاب؟</span>
+                        <span>{{ $faq['question'] ?? '' }}</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </div>
                     <div class="faq-answer">
-                        <p>بعد الشراء، ستحصل على رابط تحميل فوري عبر البريد الإلكتروني. يمكنك تحميل اللعبة مباشرة.</p>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
                     </div>
                 </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل الألعاب أصلية؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، جميع الألعاب أصلية ومرخصة مع ضمان الجودة الكامل.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>ما هي طرق الدفع المتاحة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نقبل الدفع نقداً عند الاستلام، التحويل البنكي، والبطاقات الائتمانية.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل يمكنني استرداد المبلغ؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، يمكنك استرداد المبلغ خلال 7 أيام من الشراء إذا لم تكن راضياً عن المنتج.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Order Form Section -->
     <section class="order-form-section">
@@ -351,12 +188,12 @@ $additionalFonts = '
         <div class="container">
 
             <div class="footer-bottom">
-                <p>Powered by sawa © {{ date('Y') }}</p>
+                <p>Powered by {{ $settings['site_name'] ?? 'DropSaas' }} © {{ date('Y') }}</p>
             </div>
         </div>
     </footer>
 
-    <script src="{{ asset('js/landing-games.js') }}"></script>
+    <script src="{{ asset('js/landing-faq-toggle.js') }}"></script>
 </body>
 
 </html>

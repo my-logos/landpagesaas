@@ -8,20 +8,20 @@
     </div>
 
     <!-- Page Header -->
-    <div class="orders-page-header">
-        <h1 class="orders-main-title">{{ $t('messages.order_management') ?? 'Order Management' }}</h1>
-        <div class="performance-mode-indicator">
-            <i class="fa-solid fa-info-circle"></i>
-            <span>{{ $t('messages.performance_mode') ?? 'Performance Mode' }}: {{ $t('messages.performance_mode_' . $performanceMode) ?? ucfirst($performanceMode) }}</span>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.order_management') ?? 'Order Management' }}</h1>
+            <div class="page-info">
+                <i class="fa-solid fa-info-circle"></i>
+                <span>{{ $t('messages.performance_mode') ?? 'Performance Mode' }}: {{ $t('messages.performance_mode_' . $performanceMode) ?? ucfirst($performanceMode) }}</span>
+            </div>
         </div>
-    </div>
-
-    <!-- Export Button -->
-    <div class="export-button-wrapper">
-        <a href="{{ route('user.orders.export') }}" class="btn-export-data">
-            <i class="fa-solid fa-download"></i>
-            {{ $t('messages.export_data') ?? 'Export Data' }}
-        </a>
+        <div class="page-header-right">
+            <a href="{{ route('user.orders.export') }}" class="btn-export-data">
+                <i class="fa-solid fa-download"></i>
+                {{ $t('messages.export_data') ?? 'Export Data' }}
+            </a>
+        </div>
     </div>
 
     <!-- Filter Orders Section -->
@@ -389,7 +389,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-orders.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

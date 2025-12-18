@@ -2,8 +2,21 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.edit') ?? 'Edit' }} - {{ $t('messages.landing_page_template') ?? 'Landing Page Template' }}</h1>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.edit') ?? 'تعديل' }} - {{ $t('messages.landing_page_template') ?? 'قالب صفحة الهبوط' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.landing-page-templates.index') }}" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> {{ $t('messages.back') ?? 'رجوع' }}
+            </a>
+        </div>
     </div>
 
     <div class="ls-card">
@@ -74,6 +87,6 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-templates.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 @endsection

@@ -3,8 +3,8 @@
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
     <!-- Header -->
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.dashboard') }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $t('messages.dashboard') }}</h1>
     </div>
 
     <!-- Statistics Cards -->

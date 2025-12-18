@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="wallet-topup-page" dir="{{ $dir }}">
+<div class="wallet-topup-container" dir="{{ $dir }}">
   <div class="page-header">
     <h1 class="page-title">{{ $t('messages.add_balance') ?? 'Add Balance' }}</h1>
     <p class="page-subtitle">{{ $t('messages.current_balance') }}: <strong>{{ number_format($currentBalance, 2) }} {{ $t('messages.currency') }}</strong></p>
   </div>
 
-  <div class="topup-form-container">
+  <div class="topup-form-wrapper">
     <form action="{{ route('payments.wallet') }}" method="POST" class="topup-form" enctype="multipart/form-data">
       @csrf
 
@@ -71,8 +71,7 @@
 </div>
 
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/wallet-topup.css') }}">
-<link rel="stylesheet" href="{{ asset('css/payment-package.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

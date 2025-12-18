@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.subscriptions') ?? 'Subscriptions' }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $t('messages.subscriptions') ?? 'Subscriptions' }}</h1>
     </div>
 
     <!-- Pending Wallet Payments -->

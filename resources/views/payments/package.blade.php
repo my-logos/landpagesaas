@@ -113,7 +113,7 @@
 
       <!-- Bank Transfer Information (shown only when bank_transfer is selected and wallet is not sufficient) -->
       @if(!($walletSufficient ?? false))
-      <div id="bank_transfer_info_group" style="display: none;">
+      <div id="bank_transfer_info_group">
         @if($bankTransferGateway && $bankTransferGateway->description)
         <div class="form-group bank-transfer-info">
           <label>{{ $t('messages.bank_transfer_details') ?? 'Bank Transfer Details' }}</label>
@@ -128,8 +128,8 @@
           <label for="transfer_receipt">{{ $t('messages.transfer_receipt') ?? 'Transfer Receipt' }} <span class="text-danger">*</span></label>
           <input type="file" id="transfer_receipt" name="transfer_receipt" class="form-control" accept="image/*" required>
           <small class="form-text text-muted">{{ $t('messages.upload_transfer_receipt') ?? 'Please upload a photo of your bank transfer receipt' }}</small>
-          <div id="transfer_receipt_preview" style="margin-top: 10px; display: none;">
-            <img id="transfer_receipt_preview_img" src="" alt="Receipt Preview" style="max-width: 300px; max-height: 300px; border: 1px solid #ddd; border-radius: 4px;">
+          <div id="transfer_receipt_preview">
+            <img id="transfer_receipt_preview_img" src="" alt="Receipt Preview">
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/payment-package.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

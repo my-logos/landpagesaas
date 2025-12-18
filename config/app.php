@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cron Token
+    |--------------------------------------------------------------------------
+    |
+    | This token is used to secure cron job routes. Add CRON_TOKEN to your .env
+    | file. If not set, cron routes will only accept requests from localhost.
+    |
+    */
+
+    'cron_token' => env('CRON_TOKEN', ''),
+
 ];

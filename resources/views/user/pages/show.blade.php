@@ -6,7 +6,7 @@
     <div class="ls-card page-preview-header">
         <div class="preview-header-content">
             <div class="preview-title-section">
-                <h1 class="pages-main-title">
+                <h1 class="page-title">
                     <i class="fa-solid fa-eye"></i>
                     {{ $t('messages.preview_page') ?? 'معاينة الصفحة' }}
                 </h1>

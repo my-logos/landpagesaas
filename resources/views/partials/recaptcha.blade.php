@@ -19,35 +19,5 @@ $recaptchaV3SiteKey = \App\Models\AdditionalSetting::getValue('recaptcha_v3_site
 @if($recaptchaVersion === 'v3' && $recaptchaV3SiteKey)
 <!-- Google reCAPTCHA V3 -->
 <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaV3SiteKey }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form[method="POST"]');
-        if (form) {
-            // Create hidden input for token
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = 'g-recaptcha-response';
-            form.appendChild(tokenInput);
-
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                grecaptcha.ready(function() {
-                    grecaptcha.execute('{{ $recaptchaV3SiteKey }}', {
-                        action: 'submit'
-                    }).then(function(token) {
-                        // Set token value
-                        tokenInput.value = token;
-
-                        // Submit form
-                        form.submit();
-                    }).catch(function(error) {
-                        console.error('reCAPTCHA error:', error);
-                        // Submit anyway if reCAPTCHA fails (optional - you can show error instead)
-                        form.submit();
-                    });
-                });
-            });
-        }
-    });
-</script>
+<script src="{{ asset('js/recaptcha-v3-handler.js') }}"></script>
 @endif

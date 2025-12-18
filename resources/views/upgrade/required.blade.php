@@ -67,33 +67,7 @@
   </div>
 </div>
 
-<style>
-.upgrade-required-header {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  color: white;
-}
-
-.upgrade-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.upgrade-message {
-  font-size: 1.2rem;
-  margin-top: 1rem;
-  opacity: 0.9;
-}
-
-.upgrade-footer {
-  text-align: center;
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e0e0e0;
-}
-</style>
+@push('styles')
+<!-- Styles included in main.css -->
+@endpush
 @endsection
-

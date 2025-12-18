@@ -2,19 +2,24 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <!-- Header Section -->
-    <div class="webhooks-header">
-        <div class="webhooks-header-left">
-            <button class="btn-add-webhook" data-open-modal="add-webhook">
-                <i class="fa-solid fa-plus"></i>
-                {{ $t('messages.add_new_webhook') ?? 'Add New Webhook' }}
-            </button>
-        </div>
-        <div class="webhooks-header-center">
-            <h1 class="webhooks-title">
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
                 <i class="fa-solid fa-bolt"></i>
                 {{ $t('messages.webhooks_management') ?? 'Webhooks Management' }}
             </h1>
+        </div>
+        <div class="page-header-right">
+            <button class="btn-send-message" data-open-modal="add-webhook">
+                <i class="fa-solid fa-plus"></i>
+                {{ $t('messages.add_new_webhook') ?? 'Add New Webhook' }}
+            </button>
         </div>
     </div>
 
@@ -69,7 +74,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-webhooks.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

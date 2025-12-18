@@ -1,13 +1,20 @@
 <aside class="ls-sidebar user-sidebar" dir="{{ $dir }}">
     <div class="sidebar-header">
         <div class="sidebar-brand">
-            <div class="logo">LS</div>
-            <div class="brand-name">{{ $settings['site_name'] ?? config('app.name','sawa') }}</div>
+            <div class="logo">
+                @if(!empty($settings['site_logo']))
+                <img src="{{ asset($settings['site_logo']) }}" alt="{{ $settings['site_name'] ?? config('app.name','DropSaas') }}" class="logo-image">
+                @else
+                {{ strtoupper(substr($settings['site_name'] ?? config('app.name','DropSaas'), 0, 2)) }}
+                @endif
+            </div>
+            <div class="brand-name">{{ $settings['site_name'] ?? config('app.name','DropSaas') }}</div>
         </div>
         <button class="ls-toggle-sidebar" type="button">
             <i class="fa-solid fa-bars"></i>
         </button>
     </div>
+    @include('partials.pixels')
 
     <nav class="ls-menu">
         <!-- Control Panel & Statistics -->
@@ -85,13 +92,19 @@
         <!-- Contact & Support -->
         <div class="menu-section">
             <div class="section-title">{{ $t('messages.sidebar_contact_support') }}</div>
-            <a href="#" class="menu-item">
+            <a href="{{ route('user.messages.index') }}" class="menu-item {{ str_contains($currentRoute, 'messages') ? 'active' : '' }}">
                 <i class="fa-solid fa-envelope icon"></i>
                 <span class="label">{{ $t('messages.sidebar_messages') }}</span>
+                @if(($newMessagesCount ?? 0) > 0)
+                <span class="badge">{{ $newMessagesCount }}</span>
+                @endif
             </a>
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-info-circle icon"></i>
+            <a href="{{ route('user.support.index') }}" class="menu-item {{ str_contains($currentRoute, 'support') ? 'active' : '' }}">
+                <i class="fa-solid fa-headset icon"></i>
                 <span class="label">{{ $t('messages.sidebar_support') }}</span>
+                @if(($unreadSupportRepliesCount ?? 0) > 0)
+                <span class="badge badge-new">{{ $unreadSupportRepliesCount }}</span>
+                @endif
             </a>
         </div>
 
@@ -120,7 +133,7 @@
 
     <!-- User Profile Footer -->
     <div class="sidebar-footer">
-        <div class="user-profile-info">
+        <a href="{{ route('user.profile') }}" class="user-profile-info">
             <div class="user-avatar">
                 {{ strtoupper(substr($user->name, 0, 2)) }}
             </div>
@@ -128,7 +141,7 @@
                 <div class="user-name">{{ $user->name }}</div>
                 <div class="user-plan">{{ strtoupper($userPackageName) }}</div>
             </div>
-        </div>
+        </a>
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf
             <button type="submit" class="logout-btn">

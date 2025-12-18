@@ -2,8 +2,21 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.add_new') ?? 'Add New' }} - {{ $t('messages.payment_gateway') ?? 'Payment Gateway' }}</h1>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.add_new') ?? 'إضافة جديد' }} - {{ $t('messages.payment_gateway') ?? 'بوابة الدفع' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.payment-gateways.index') }}" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> {{ $t('messages.back') ?? 'رجوع' }}
+            </a>
+        </div>
     </div>
 
     <div class="ls-card">

@@ -140,6 +140,22 @@ class AIService
 
     /**
      * Make Gemini API request with fallback strategy
+     * 
+     * This method implements a fallback mechanism to ensure high availability:
+     * 1. First attempts to use Gemini 2.5 Flash (latest and fastest model)
+     * 2. Falls back to Gemini 2.0 Flash Experimental if 2.5 fails
+     * 3. Falls back to Gemini 2.0 Flash (stable) if experimental fails
+     * 
+     * Error handling:
+     * - Quota errors: Stops immediately (all models share the same quota)
+     * - 429 (Rate Limit): Retries with next model
+     * - 404 (Model Not Found): Retries with next model
+     * - Other errors: Stops retrying (likely configuration issues)
+     * 
+     * @param string $apiKey The Gemini API key
+     * @param array $requestData The request payload
+     * @param int $timeout Request timeout in seconds (default 120)
+     * @return array Response array with 'success', 'content', 'finish_reason', 'status', and 'error' keys
      */
     private function makeGeminiRequest(string $apiKey, array $requestData, int $timeout = 120): array
     {
@@ -148,10 +164,12 @@ class AIService
             'X-goog-api-key' => $apiKey,
         ];
 
+        // Ordered list of API endpoints (best to worst)
+        // Try latest model first, then fallback to older/stable versions
         $urls = [
-            self::GEMINI_API_URL_2_5_FLASH,
-            self::GEMINI_API_URL_2_0,
-            self::GEMINI_API_URL_FALLBACK,
+            self::GEMINI_API_URL_2_5_FLASH,      // Latest: Gemini 2.5 Flash (fastest)
+            self::GEMINI_API_URL_2_0,            // Fallback: Gemini 2.0 Flash Experimental
+            self::GEMINI_API_URL_FALLBACK,       // Last resort: Gemini 2.0 Flash (stable)
         ];
 
         $lastResponse = null;
@@ -159,8 +177,10 @@ class AIService
             $response = Http::timeout($timeout)->withHeaders($headers)->post($url, $requestData);
             $lastResponse = $response;
 
+            // Success: Extract content from response structure
             if ($response->successful()) {
                 $data = $response->json();
+                // Gemini API response structure: candidates[0].content.parts[0].text
                 $content = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
                 $finishReason = $data['candidates'][0]['finishReason'] ?? null;
 
@@ -175,21 +195,24 @@ class AIService
                 ];
             }
 
-            // Get error message to check if it's quota related
+            // Check if error is quota-related
             $errorBody = $response->json();
             $errorMessage = $errorBody['error']['message'] ?? '';
             $isQuotaError = $this->isQuotaExceededError($errorMessage);
 
-            // If quota exceeded, stop trying immediately (won't work with other models either)
+            // Quota exceeded: Stop immediately
+            // All models share the same API quota, so retrying won't help
             if ($isQuotaError) {
                 break;
             }
 
-            // Only retry on 429 or 404, not on other errors
+            // Only retry on transient errors (429 rate limit, 404 model not found)
+            // Don't retry on other errors (401 auth, 400 bad request, etc.)
             if ($response->status() !== 429 && $response->status() !== 404) {
                 break;
             }
 
+            // Log fallback attempt (only if more models available)
             if ($index < count($urls) - 1) {
                 Log::warning("Gemini API request failed ({$response->status()}), trying fallback");
             }
@@ -204,7 +227,14 @@ class AIService
     }
 
     /**
-     * Check if error is quota exceeded (simple check)
+     * Check if error message indicates API quota exceeded
+     * 
+     * When API quota is exceeded, retrying with different models won't help
+     * because all models share the same API quota. This method detects quota
+     * errors to prevent unnecessary retry attempts.
+     * 
+     * @param string $errorMessage The error message from API response
+     * @return bool True if error indicates quota exceeded, false otherwise
      */
     private function isQuotaExceededError(string $errorMessage): bool
     {
@@ -212,9 +242,12 @@ class AIService
             return false;
         }
 
+        // Keywords that indicate quota exceeded error
+        // Different API error messages may use different wording
         $quotaKeywords = ['quota', 'Quota exceeded', 'exceeded your current quota'];
         $lowerMessage = strtolower($errorMessage);
 
+        // Check if any quota keyword exists in error message (case-insensitive)
         foreach ($quotaKeywords as $keyword) {
             if (stripos($lowerMessage, strtolower($keyword)) !== false) {
                 return true;

@@ -10,7 +10,7 @@
     <!-- Hero Section -->
     @php
     $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
-    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? $page->content ?? '');
+    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
     @endphp
     <section class="hero">
         <div class="container">
@@ -35,8 +35,8 @@
             <p>
                 @if($smartCouponsEnabled)
                 <strong>
-                    <span style="text-decoration: line-through; color: #999;">{{ number_format($increasedPrice, 2) }}</span>
-                    <span style="color: #667eea; font-size: 1.2em;">{{ number_format($finalPrice, 2) }}</span>
+                    <span class="old-price-inline">{{ number_format($increasedPrice, 2) }}</span>
+                    <span class="new-price-inline">{{ number_format($finalPrice, 2) }}</span>
                     {{ $page->product->currency ?? 'EGP' }}
                 </strong>
                 @else
@@ -53,11 +53,15 @@
     $features = $aiContent['features'] ?? [];
     @endphp
     @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
             <h2 class="section-title">{{ $pageLanguage === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
-                @foreach($features as $feature)
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
                     @if(isset($feature['icon']))
                     <div class="feature-icon">
@@ -101,166 +105,6 @@
 
     <!-- Order Form -->
     @include('landing-templates.partials.order-form')
-
-    <script src="{{ asset('js/landing-default.js') }}"></script>
-    <script>
-        // FAQ Toggle Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const faqItems = document.querySelectorAll('.faq-item');
-
-            faqItems.forEach(function(item) {
-                const question = item.querySelector('.faq-question');
-                const answer = item.querySelector('.faq-answer');
-                const icon = question.querySelector('i');
-
-                if (question && answer) {
-                    question.addEventListener('click', function() {
-                        const isOpen = item.classList.contains('active');
-
-                        // Close all other items
-                        faqItems.forEach(function(otherItem) {
-                            if (otherItem !== item) {
-                                otherItem.classList.remove('active');
-                                const otherIcon = otherItem.querySelector('.faq-question i');
-                                if (otherIcon) {
-                                    otherIcon.style.transform = 'rotate(0deg)';
-                                }
-                            }
-                        });
-
-                        // Toggle current item
-                        if (isOpen) {
-                            item.classList.remove('active');
-                            if (icon) {
-                                icon.style.transform = 'rotate(0deg)';
-                            }
-                        } else {
-                            item.classList.add('active');
-                            if (icon) {
-                                icon.style.transform = 'rotate(180deg)';
-                            }
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-    <style>
-        /* FAQ Styles */
-        .faq-section {
-            padding: 60px 0;
-            background-color: #f8f9fa;
-        }
-
-        .faq-list {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .faq-item {
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .faq-question {
-            padding: 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .faq-question:hover {
-            background-color: #f0f0f0;
-        }
-
-        .faq-question i {
-            transition: transform 0.3s;
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .faq-item.active .faq-answer {
-            max-height: 500px;
-        }
-
-        .faq-answer p {
-            padding: 0 20px 20px 20px;
-            margin: 0;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* Features Styles */
-        .features-section {
-            padding: 60px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 40px;
-            color: #333;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .feature-icon {
-            font-size: 3em;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-
-        .feature-title {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .feature-description {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .section-title {
-                font-size: 1.5em;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </body>
 
 </html>

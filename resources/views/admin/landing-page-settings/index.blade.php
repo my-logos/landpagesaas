@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.landing_page_settings') ?? 'Landing Page Settings' }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $t('messages.landing_page_settings') ?? 'Landing Page Settings' }}</h1>
     </div>
 
     <div class="ls-card">
@@ -17,15 +17,15 @@
                 <div class="form-group">
                     <input type="file" id="hero_image" name="hero_image" class="form-control" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/svg+xml">
                     @if($firstHeroImage)
-                    <div class="logo-preview" style="margin-top: 15px;">
-                        <img src="{{ asset($firstHeroImage) }}" alt="Hero Image" class="logo-preview-image" style="max-width: 300px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                    <div class="logo-preview">
+                        <img src="{{ asset($firstHeroImage) }}" alt="Hero Image" class="logo-preview-image">
                         <input type="hidden" name="hero_image_url" value="{{ $firstHeroImage }}">
                     </div>
                     @endif
                     <small class="form-text text-muted">
                         {{ $t('messages.hero_image_hint') ?? 'Upload an image to replace the default hero illustration' }}
                         <br>
-                        <strong style="color: #dc2626;">{{ $t('messages.hero_image_required') ?? 'Note: Hero image is required if "Enable Hero Image" is checked in any language tab.' }}</strong>
+                        <strong class="text-danger">{{ $t('messages.hero_image_required') ?? 'Note: Hero image is required if "Enable Hero Image" is checked in any language tab.' }}</strong>
                     </small>
                 </div>
             </div>
@@ -242,6 +242,9 @@
                                     <option value="youtube" {{ ($link['platform'] ?? '') === 'youtube' ? 'selected' : '' }}>YouTube</option>
                                     <option value="tiktok" {{ ($link['platform'] ?? '') === 'tiktok' ? 'selected' : '' }}>TikTok</option>
                                     <option value="snapchat" {{ ($link['platform'] ?? '') === 'snapchat' ? 'selected' : '' }}>Snapchat</option>
+                                    <option value="whatsapp" {{ ($link['platform'] ?? '') === 'whatsapp' ? 'selected' : '' }}>WhatsApp</option>
+                                    <option value="telegram" {{ ($link['platform'] ?? '') === 'telegram' ? 'selected' : '' }}>Telegram</option>
+                                    <option value="email" {{ ($link['platform'] ?? '') === 'email' ? 'selected' : '' }}>Email</option>
                                 </select>
                             </div>
                             <div class="col-md-6">

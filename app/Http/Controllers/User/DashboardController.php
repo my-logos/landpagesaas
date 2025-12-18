@@ -18,19 +18,59 @@ class DashboardController extends Controller
         $user = $request->user();
         ['locale' => $locale, 'dir' => $dir, 't' => $t] = $this->getLocaleData();
 
+        // Get subscription data first (needed by other methods)
+        $subscriptionData = $this->getSubscriptionData($user);
+        $currentSubscription = $subscriptionData['subscription'];
+        $currentPackage = $subscriptionData['package'];
+
+        // Get resource counts and usage (optimized: used by tipsSteps)
+        $resourceStats = $this->getResourceStatistics($user, $currentPackage);
+
         // Get orders statistics
         $ordersStats = $this->getOrdersStatistics($user);
 
         // Get chart data
         $chartData = $this->getChartData($user, $t);
 
-        // Get subscription data
-        $subscriptionData = $this->getSubscriptionData($user);
-        $currentSubscription = $subscriptionData['subscription'];
-        $currentPackage = $subscriptionData['package'];
+        // Check tips visibility status
+        $tipsDisabled = $user->tips_disabled ?? false;
 
-        // Get resource counts and usage
-        $resourceStats = $this->getResourceStatistics($user, $currentPackage);
+        // Check tips steps completion
+        // Optimized: Pre-fetch counts to avoid multiple queries
+        $productsCount = $resourceStats['productsCount'] ?? 0;
+        $publishedPagesCount = $user->pages()->where('status', 'published')->count();
+        $hasVerifiedEmail = $user->hasVerifiedEmail();
+
+        $tipsSteps = [
+            'step1' => [
+                'completed' => $hasVerifiedEmail,
+                'title' => $locale === 'ar' ? 'تفعيل الإيميل' : 'Verify Email',
+                'description' => $locale === 'ar' ? 'قم بتفعيل إيميلك للبدء في استخدام المنصة. افتح الإيميل الذي تم إرساله إليك وانقر على رابط التفعيل.' : 'Verify your email to start using the platform. Open the email sent to you and click the verification link.',
+                'action_url' => $hasVerifiedEmail ? '#' : (route('verification.verify', ['id' => $user->id, 'hash' => sha1($user->email)]) ?? '#'),
+                'action_text' => $locale === 'ar' ? 'تفعيل الإيميل' : 'Verify Email',
+                'image' => asset('assets/1.png'),
+            ],
+            'step2' => [
+                'completed' => $productsCount > 0,
+                'title' => $locale === 'ar' ? 'إنشاء المنتج' : 'Create Product',
+                'description' => $locale === 'ar' ? 'قم بإنشاء منتجك الأول وإضافة بياناته مثل الاسم والوصف والسعر والصور' : 'Create your first product and add its data such as name, description, price, and images',
+                'action_url' => route('user.products.create'),
+                'action_text' => $locale === 'ar' ? 'إنشاء منتج' : 'Create Product',
+                'image' => asset('assets/2.png'),
+            ],
+            'step3' => [
+                'completed' => $publishedPagesCount > 0,
+                'title' => $locale === 'ar' ? 'إنشاء صفحة هبوط ونشرها' : 'Create & Publish Landing Page',
+                'description' => $locale === 'ar' ? 'قم بإنشاء صفحة هبوط لنشر منتجك، ثم انشرها وأخذ رابط الصفحة لمشاركته مع عملائك' : 'Create a landing page to promote your product, then publish it and get the page link to share with your customers',
+                'action_url' => route('user.pages.create'),
+                'action_text' => $locale === 'ar' ? 'إنشاء صفحة' : 'Create Page',
+                'images' => [
+                    asset('assets/3.png'),
+                    asset('assets/4.png'),
+                    asset('assets/5.png'),
+                ],
+            ],
+        ];
 
         return view('user.dashboard', array_merge(
             compact('locale', 'dir', 't'),
@@ -40,6 +80,8 @@ class DashboardController extends Controller
                 'walletBalance' => $user->wallet_balance ?? 0,
                 'currentSubscription' => $currentSubscription,
                 'currentPackage' => $currentPackage,
+                'tipsDisabled' => $tipsDisabled,
+                'tipsSteps' => $tipsSteps,
             ],
             $resourceStats
         ));
@@ -111,16 +153,22 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Orders by status
-        $allStatuses = ['pending', 'processing', 'shipped', 'delivered', 'rejected', 'failed_delivery', 'postponed'];
-        $ordersByStatus = collect($allStatuses)->map(function ($status) use ($user) {
-            return (object)[
-                'status' => $status,
-                'count' => $user->orders()->where('status', $status)->count()
-            ];
-        })->filter(function ($item) {
+        // Orders by status - Optimized: use single query with groupBy instead of N+1 queries
+        $ordersByStatusRaw = $user->orders()
+            ->select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->map(function ($item) {
+                return (object)[
+                    'status' => $item->status,
+                    'count' => (int) $item->count
+                ];
+            });
+
+        // Filter out zero counts and sort by status
+        $ordersByStatus = $ordersByStatusRaw->filter(function ($item) {
             return $item->count > 0;
-        });
+        })->values();
 
         // Orders by landing page
         $ordersByPage = $user->orders()
@@ -189,5 +237,21 @@ class DashboardController extends Controller
         }
 
         return min(100, ($current / $limit) * 100);
+    }
+
+    /**
+     * Disable tips for user
+     */
+    public function disableTips(Request $request)
+    {
+        $user = $request->user();
+
+        $user->tips_disabled = $request->input('disabled', true);
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Tips preference saved'
+        ]);
     }
 }

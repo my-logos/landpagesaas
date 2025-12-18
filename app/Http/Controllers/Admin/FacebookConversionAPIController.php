@@ -62,7 +62,8 @@ class FacebookConversionAPIController extends BaseAdminController
             ]);
         }
 
-        // Update system default settings - مربوطة بصفحة الهبوط الرئيسية للنظام
+        // Update system default settings
+        // These settings are linked to the main system landing page
         $isEnabled = $request->boolean('is_enabled');
 
         $settings->update([

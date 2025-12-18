@@ -3,8 +3,11 @@
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
     <!-- Header Section -->
-    <div class="products-header">
-        <div class="products-header-left">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.products') ?? 'المنتجات' }}</h1>
+        </div>
+        <div class="page-header-right">
             <a href="{{ route('user.products.create') }}" class="btn-add-product">
                 <i class="fa-solid fa-plus"></i>
                 <span>{{ $t('messages.add_new_product') ?? 'إضافة منتج جديد' }}</span>
@@ -18,7 +21,6 @@
                 </button>
             </div>
         </div>
-        <h1 class="dashboard-title">{{ $t('messages.products') ?? 'المنتجات' }}</h1>
     </div>
 
     <!-- Advanced Search and Filtering Section -->
@@ -28,10 +30,10 @@
                 <i class="fa-solid fa-filter"></i>
                 <span>{{ $t('messages.advanced_search_filter') ?? 'البحث والتصفية المتقدمة' }}</span>
             </div>
-            <i class="fa-solid fa-chevron-up" id="filterChevron"></i>
+            <i class="fa-solid fa-chevron-down" id="filterChevron"></i>
         </div>
 
-        <div class="filter-content" id="filterContent">
+        <div class="filter-content collapsed" id="filterContent">
             <form method="GET" action="{{ route('user.products.index') }}" id="filterForm">
                 <div class="filter-form-grid">
                     <!-- Creation Date From -->
@@ -172,7 +174,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-products.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

@@ -2,9 +2,19 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.manage_languages') ?? 'Manage Languages' }}</h1>
-        <a href="{{ route('admin.languages.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'Add New' }}</a>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.manage_languages') ?? 'إدارة اللغات' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.languages.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'إضافة جديد' }}</a>
+        </div>
     </div>
 
     <div class="chart-card">

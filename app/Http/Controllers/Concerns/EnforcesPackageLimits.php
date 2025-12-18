@@ -43,17 +43,21 @@ trait EnforcesPackageLimits
         }
 
         // Get the limit value (can be null, 0, or a positive integer)
+        // Limit value interpretation:
+        // - null: Unlimited (no restrictions)
+        // - 0: Feature disabled (access denied)
+        // - Positive integer: Maximum allowed count
         $limit = $package->getAttribute($limitField);
 
-        // null means unlimited
+        // null means unlimited - allow creation
         if ($limit === null) {
             return null;
         }
 
-        // Convert limit to integer
+        // Convert limit to integer for comparison
         $limit = (int) $limit;
 
-        // If limit is 0, deny access
+        // If limit is 0, feature is disabled - deny access immediately
         if ($limit === 0) {
             Log::warning('Limit is zero', [
                 'current_count' => $currentCount,
@@ -63,7 +67,9 @@ trait EnforcesPackageLimits
                 ->with('error', TranslationHelper::get('messages.limit_reached', 'Limit reached') . ' (' . TranslationHelper::get('messages.limit', 'Limit') . ': ' . $limit . ')');
         }
 
-        // Check if current count (before creating new one) would exceed the limit
+        // Check if current count (before creating new item) would exceed the limit
+        // Example: If limit=5 and currentCount=5, user already has 5 items, can't create 6th
+        // We check >= instead of > because we're checking BEFORE creating the new item
         if ($currentCount >= $limit) {
             Log::warning('Limit reached', [
                 'user_id' => $user->id,
@@ -74,17 +80,20 @@ trait EnforcesPackageLimits
                 'package_name' => $package->name
             ]);
 
-            // Get limit field name in user-friendly format
+            // Convert limit field name to user-friendly format
+            // Example: 'pages_limit' -> 'pages' -> 'Pages'
             $limitFieldKey = str_replace('_limit', '', $limitField);
             $limitFieldName = TranslationHelper::get('messages.' . $limitFieldKey, $limitFieldKey);
 
-            // Create upgrade message with placeholders
+            // Get localized upgrade message template with placeholders
+            // Placeholders: :field (resource name), :current (current count), :limit (max limit)
             $messageTemplate = TranslationHelper::get(
                 'messages.limit_reached_upgrade',
                 'You have reached the limit for :field (:current/:limit). Please upgrade your plan to create more.'
             );
 
-            // Replace placeholders
+            // Replace placeholders in message template
+            // Example: "You have reached the limit for Pages (5/5). Please upgrade your plan..."
             $message = str_replace(
                 [':field', ':current', ':limit'],
                 [$limitFieldName, $currentCount, $limit],
@@ -128,17 +137,21 @@ trait EnforcesPackageLimits
         }
 
         // Get the limit value (can be null, 0, or a positive integer)
+        // Limit value interpretation:
+        // - null: Unlimited (no restrictions) - allow creation
+        // - 0: Feature disabled (access denied) - abort with 403
+        // - Positive integer: Maximum allowed count - check if exceeded
         $limit = $package->getAttribute($limitField);
 
-        // null means unlimited
+        // null means unlimited - allow creation, no need to check
         if ($limit === null) {
             return;
         }
 
-        // Convert limit to integer
+        // Convert limit to integer for comparison
         $limit = (int) $limit;
 
-        // If limit is 0, deny access
+        // If limit is 0, feature is disabled - deny access with 403 Forbidden
         if ($limit === 0) {
             $message = TranslationHelper::get('messages.limit_reached', 'Limit reached');
             Log::warning('Limit is zero', [
@@ -148,8 +161,10 @@ trait EnforcesPackageLimits
             abort(Response::HTTP_FORBIDDEN, $message . ' (' . TranslationHelper::get('messages.limit') . ': ' . $limit . ')');
         }
 
-        // Check if current count (before creating new one) would exceed the limit
-        // If currentCount is already at or above limit, deny
+        // Check if current count (before creating new item) would exceed the limit
+        // Logic: We check BEFORE creation, so if currentCount >= limit, deny
+        // Example: limit=5, currentCount=5 means user already has 5 items
+        //          Creating a 6th item would exceed the limit, so we deny
         // Example: limit=1, currentCount=1 means user already has 1 page, can't create another
         if ($currentCount >= $limit) {
             $message = TranslationHelper::get('messages.limit_reached', 'Limit reached');

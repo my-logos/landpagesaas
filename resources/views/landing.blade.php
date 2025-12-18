@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome 7 - Latest Version with Colors -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{ asset('css/landing-saas.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/landing-home.css') }}">
+    <!-- Main CSS - Unified file containing all styles -->
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 </head>
 
 <body class="lp-body">
@@ -24,14 +24,14 @@
     @if($googleTagEnabled && $googleTagId)
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $googleTagId }}"
-            height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+            height="0" width="0" class="gtm-noscript"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     @endif
     <!-- Header -->
     <nav class="lp-topbar-new">
         <div class="container lp-topbar-inner-new">
             @if((isset($siteLogo) && $siteLogo) || (isset($settings['site_logo']) && $settings['site_logo']))
-            <img src="{{ asset('' . ($siteLogo ?? $settings['site_logo'])) }}" alt="{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}" class="lp-logo-img" style="max-height: 40px;" />
+            <img src="{{ asset('' . ($siteLogo ?? $settings['site_logo'])) }}" alt="{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}" class="lp-logo-img" />
             @else
             <div class="lp-logo-new">{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}</div>
             @endif
@@ -68,7 +68,7 @@
                         <span class="lp-animated-title-text" id="animatedTitleText" data-locale="{{ $locale }}" data-words="{{ $heroAnimatedWords ?? ($locale === 'ar' ? 'ساعة ذكية,منتج رقمي,لعبة' : 'smart watch,digital product,game') }}"></span>
                     </h1>
                     <p class="lp-sub-new">
-                        {{ $heroSubtitle ?? ($locale === 'ar' ? 'في 30 ثانية ⚡ بالذكاء الاصطناعي. ضاعف أرباحك مع ' . ($siteName ?? 'Sawa') . '. استضافة سريعة، تصميم احترافي بضغطة زر, وحماية متقدمة توفر 100% من ميزانية إعلاناتك المهدرة.' : 'In 30 seconds ⚡ with AI. Double your profits with ' . ($siteName ?? 'Sawa') . '. Fast hosting, professional design with a click of a button, and advanced protection that saves 100% of your wasted advertising budget.') }}
+                        {{ $heroSubtitle ?? ($locale === 'ar' ? 'في 30 ثانية ⚡ بالذكاء الاصطناعي. ضاعف أرباحك مع ' . ($siteName ?? 'DropSaas') . '. استضافة سريعة، تصميم احترافي بضغطة زر, وحماية متقدمة توفر 100% من ميزانية إعلاناتك المهدرة.' : 'In 30 seconds ⚡ with AI. Double your profits with ' . ($siteName ?? 'DropSaas') . '. Fast hosting, professional design with a click of a button, and advanced protection that saves 100% of your wasted advertising budget.') }}
                     </p>
 
                     <form action="{{ route('register.step1') }}" method="GET" class="lp-hero-input-group">
@@ -116,7 +116,7 @@
                         @if(($heroImageEnabled ?? false) && !empty($heroImage ?? ''))
                         <img src="{{ asset($heroImage) }}" alt="Hero Image" class="lp-hero-illustration" />
                         @else
-                        <img src="https://sawa.store/static/media/hero-illustration-ai.46e2030b8091affb5eca66e67a54537a.svg" alt="Hero Illustration" class="lp-hero-illustration" />
+                        <img src="https://DropSaas.store/static/media/hero-illustration-ai.46e2030b8091affb5eca66e67a54537a.svg" alt="Hero Illustration" class="lp-hero-illustration" />
                         @endif
                     </div>
                 </div>
@@ -494,7 +494,7 @@
                     <thead>
                         <tr>
                             <th class="lp-comparison-feature-col">{{ $locale === 'ar' ? 'الميزة' : 'Feature' }}</th>
-                            <th class="lp-comparison-platform-col lp-comparison-sawa">{{ $siteName ?? 'Sawa' }}</th>
+                            <th class="lp-comparison-platform-col lp-comparison-DropSaas">{{ $siteName ?? 'DropSaas' }}</th>
                             <th class="lp-comparison-platform-col">SHOPIFY</th>
                             <th class="lp-comparison-platform-col">WORDPRESS</th>
                         </tr>
@@ -502,7 +502,7 @@
                     <tbody>
                         <tr>
                             <td class="lp-comparison-feature-name">{{ $locale === 'ar' ? 'التكلفة الشهرية' : 'Monthly Cost' }}</td>
-                            <td class="lp-comparison-cell lp-comparison-sawa">
+                            <td class="lp-comparison-cell lp-comparison-DropSaas">
                                 <span class="lp-comparison-success">{{ $locale === 'ar' ? '0 ج.م (البداية)' : '0 EGP (Starting)' }}</span>
                             </td>
                             <td class="lp-comparison-cell">+$29</td>
@@ -510,7 +510,7 @@
                         </tr>
                         <tr>
                             <td class="lp-comparison-feature-name">{{ $locale === 'ar' ? 'حماية الطلبات الوهمية' : 'Fake Order Protection' }}</td>
-                            <td class="lp-comparison-cell lp-comparison-sawa">
+                            <td class="lp-comparison-cell lp-comparison-DropSaas">
                                 <i class="fa-solid fa-check lp-comparison-check"></i>
                             </td>
                             <td class="lp-comparison-cell">
@@ -523,7 +523,7 @@
                         </tr>
                         <tr>
                             <td class="lp-comparison-feature-name">{{ $locale === 'ar' ? 'الإنشاء بالذكاء الاصطناعي' : 'AI-powered Creation' }}</td>
-                            <td class="lp-comparison-cell lp-comparison-sawa">
+                            <td class="lp-comparison-cell lp-comparison-DropSaas">
                                 <i class="fa-solid fa-check lp-comparison-check"></i>
                             </td>
                             <td class="lp-comparison-cell">
@@ -535,7 +535,7 @@
                         </tr>
                         <tr>
                             <td class="lp-comparison-feature-name">{{ $locale === 'ar' ? 'سرعة التحميل (مصر/الخليج)' : 'Download Speed (Egypt/Gulf)' }}</td>
-                            <td class="lp-comparison-cell lp-comparison-sawa">
+                            <td class="lp-comparison-cell lp-comparison-DropSaas">
                                 <span class="lp-comparison-success">{{ $locale === 'ar' ? 'فائق السرعة' : 'Ultra-fast' }} ⚡</span>
                             </td>
                             <td class="lp-comparison-cell">{{ $locale === 'ar' ? 'متوسط' : 'Average' }}</td>
@@ -621,11 +621,11 @@
             <div class="lp-faq-list">
                 <div class="lp-faq-item">
                     <div class="lp-faq-question">
-                        <strong>{{ $locale === 'ar' ? 'ما هي منصة ' . ($siteName ?? 'Sawa') . '؟' : 'What is the ' . ($siteName ?? 'Sawa') . ' platform?' }}</strong>
+                        <strong>{{ $locale === 'ar' ? 'ما هي منصة ' . ($siteName ?? 'DropSaas') . '؟' : 'What is the ' . ($siteName ?? 'DropSaas') . ' platform?' }}</strong>
                         <span class="lp-faq-icon">+</span>
                     </div>
                     <div class="lp-faq-answer">
-                        <p>{{ $locale === 'ar' ? 'منصة ' . ($siteName ?? 'Sawa') . ' هي منصة متكاملة لإنشاء صفحات الهبوط الاحترافية باستخدام الذكاء الاصطناعي. تمكنك من إنشاء صفحات هبوط جذابة وفعالة في دقائق معدودة دون الحاجة لمعرفة تقنية متقدمة.' : ($siteName ?? 'Sawa') . ' is an integrated platform for creating professional landing pages using artificial intelligence. It enables you to create attractive and effective landing pages in minutes without the need for advanced technical knowledge.' }}</p>
+                        <p>{{ $locale === 'ar' ? 'منصة ' . ($siteName ?? 'DropSaas') . ' هي منصة متكاملة لإنشاء صفحات الهبوط الاحترافية باستخدام الذكاء الاصطناعي. تمكنك من إنشاء صفحات هبوط جذابة وفعالة في دقائق معدودة دون الحاجة لمعرفة تقنية متقدمة.' : ($siteName ?? 'DropSaas') . ' is an integrated platform for creating professional landing pages using artificial intelligence. It enables you to create attractive and effective landing pages in minutes without the need for advanced technical knowledge.' }}</p>
                     </div>
                 </div>
                 <div class="lp-faq-item">
@@ -675,7 +675,7 @@
             <div class="lp-footer-inner">
                 <div class="lp-footer-left">
                     @if((isset($siteLogo) && $siteLogo) || (isset($settings['site_logo']) && $settings['site_logo']))
-                    <img src="{{ asset('' . ($siteLogo ?? $settings['site_logo'])) }}" alt="{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}" class="lp-footer-logo-img" style="max-height: 40px;" />
+                    <img src="{{ asset('' . ($siteLogo ?? $settings['site_logo'])) }}" alt="{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}" class="lp-footer-logo-img" />
                     @else
                     <div class="lp-footer-logo">{{ $siteName ?? $settings['site_name'] ?? $t('messages.app_name') }}</div>
                     @endif

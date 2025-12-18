@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">
+    <div class="page-header">
+        <h1 class="page-title">
             <span class="pro-badge">PRO</span>
             {{ $t('messages.facebook_conversion_api') ?? 'Facebook Conversion API' }}
             <i class="fa-brands fa-facebook"></i>
@@ -41,7 +41,7 @@
             <form method="POST" action="{{ route('admin.facebook-conversion-api.update') }}" id="facebookConversionAPIForm">
                 @csrf
                 @method('PUT')
-                
+
                 <!-- Pixel ID -->
                 <div class="form-group">
                     <label for="pixel_id" class="form-label">
@@ -115,8 +115,8 @@
                     </div>
                 </div>
 
-                <div class="form-actions" style="display: flex !important; justify-content: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                    <button type="submit" class="btn btn-primary" style="display: inline-flex !important; min-width: 150px; padding: 0.75rem 1.5rem; background: #5561ff; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; align-items: center; gap: 0.5rem; transition: all 0.3s; font-size: 1rem;">
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fa-solid fa-check"></i>
                         {{ $t('messages.save_settings') ?? 'Save Settings' }}
                     </button>
@@ -128,5 +128,5 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-facebook-conversion-api.css') }}">
+<!-- Styles included in main.css -->
 @endpush

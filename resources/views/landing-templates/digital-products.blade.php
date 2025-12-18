@@ -1,5 +1,5 @@
 @php
-$templateCss = 'css/landing-digital-products.css';
+$templateCss = 'landpage/css/landing-digital-products.css';
 $additionalFonts = '
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,6 @@ $additionalFonts = '
     @include('landing-templates.partials.page-features')
     <!-- Top Banner -->
     <div class="top-banner">
-        {{ $page->additional_description ?? 'عرض حصري على المنتجات الرقمية! احصل على خصم فوري، العرض محدود!' }}
     </div>
 
     <!-- Hero Section - Minimal Clean Design -->
@@ -28,8 +27,12 @@ $additionalFonts = '
                         <span>منتجات رقمية</span>
                     </div>
                     <h1 class="hero-title-minimal">{{ $page->title ?? ($page->product->name ?? 'منتجات رقمية متطورة') }}</h1>
+                    @php
+                    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+                    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
+                    @endphp
                     <p class="hero-description-minimal">
-                        {{ $page->content ?? ($page->product->description ?? 'اكتشف مجموعة واسعة من المنتجات الرقمية عالية الجودة. حلول مبتكرة لتسريع نمو عملك.') }}
+                        {{ $heroDescription }}
                     </p>
                     @if($page->product)
                     <div class="pricing-minimal">
@@ -79,41 +82,36 @@ $additionalFonts = '
     </section>
 
     <!-- Features Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $features = $aiContent['features'] ?? [];
+    @endphp
+    @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
-            <h2 class="section-title">مميزات منتجاتنا الرقمية</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
+                    @if(isset($feature['icon']))
                     <div class="feature-icon">
-                        <i class="fa-solid fa-rocket"></i>
+                        <i class="{{ $feature['icon'] }}"></i>
                     </div>
-                    <h3 class="feature-title">أداء عالي</h3>
-                    <p class="feature-description">منتجات محسّنة للأداء العالي والسرعة</p>
+                    @endif
+                    <h3 class="feature-title">{{ $feature['title'] ?? '' }}</h3>
+                    <p class="feature-description">{{ $feature['description'] ?? '' }}</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h3 class="feature-title">آمن ومحمي</h3>
-                    <p class="feature-description">حماية كاملة لبياناتك ومعلوماتك</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-sync"></i>
-                    </div>
-                    <h3 class="feature-title">تحديثات مستمرة</h3>
-                    <p class="feature-description">تحديثات مجانية وميزات جديدة باستمرار</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-headset"></i>
-                    </div>
-                    <h3 class="feature-title">دعم فني 24/7</h3>
-                    <p class="feature-description">فريق دعم فني متاح على مدار الساعة</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Product Gallery Section -->
     @if($page->product && $page->product->images)
@@ -134,195 +132,34 @@ $additionalFonts = '
     </section>
     @endif
 
-    <!-- Product Details Section -->
-    <section class="product-details-section">
-        <div class="container">
-            <div class="product-details-content">
-                <div class="details-image">
-                    @if($page->product && $page->product->images)
-                    @if($detailImage)
-                    <img src="{{ $detailImage }}" alt="Product Details">
-                    @endif
-                    @endif
-                </div>
-                <div class="details-text">
-                    <h2 class="details-title">مميزات المنتجات</h2>
-                    <ul class="details-list">
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-code"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>كود نظيف ومحسّن</strong>
-                                <span>كود نظيف ومحسّن يضمن الأداء العالي</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-mobile-screen-button"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>متجاوب بالكامل</strong>
-                                <span>يعمل بشكل مثالي على جميع الأجهزة</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-globe"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>متعدد اللغات</strong>
-                                <span>يدعم عدة لغات بما فيها العربية</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-file-code"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>وثائق شاملة</strong>
-                                <span>وثائق مفصلة لمساعدتك في الاستخدام</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Choose Section -->
-    <section class="why-choose-section">
-        <div class="container">
-            <h2 class="section-title">لماذا تختارنا؟</h2>
-            <div class="why-choose-grid">
-                <div class="why-choose-card">
-                    <div class="why-choose-number">01</div>
-                    <h3 class="why-choose-title">جودة عالية</h3>
-                    <p class="why-choose-description">منتجات عالية الجودة تم اختبارها بدقة</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">02</div>
-                    <h3 class="why-choose-title">أسعار مناسبة</h3>
-                    <p class="why-choose-description">أفضل الأسعار مع عروض وخصومات مستمرة</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">03</div>
-                    <h3 class="why-choose-title">دعم فني ممتاز</h3>
-                    <p class="why-choose-description">فريق دعم فني محترف متاح دائماً</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">04</div>
-                    <h3 class="why-choose-title">ضمان الجودة</h3>
-                    <p class="why-choose-description">نضمن رضاك التام أو استرداد كامل المبلغ</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="container">
-            <h2 class="section-title">آراء عملائنا</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-blue">أ</div>
-                        <div class="testimonial-info">
-                            <h4>أحمد خالد</h4>
-                            <p>(القاهرة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"منتجات رقمية ممتازة وسهلة الاستخدام. الجودة عالية والدعم الفني سريع. أنصح الجميع."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-teal">س</div>
-                        <div class="testimonial-info">
-                            <h4>سارة محمد</h4>
-                            <p>(الجيزة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"اشتريت عدة منتجات رقمية وكانت جميعها ممتازة. التحديثات مستمرة والدعم الفني متاح دائماً."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-indigo">م</div>
-                        <div class="testimonial-info">
-                            <h4>محمد علي</h4>
-                            <p>(الإسكندرية)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"أفضل موقع للمنتجات الرقمية. الجودة عالية والأسعار معقولة. سأستمر في الشراء منهم."</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- FAQ Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $faqs = $aiContent['faqs'] ?? [];
+    @endphp
+    @if(!empty($faqs))
     <section class="faq-section">
         <div class="container">
-            <h2 class="section-title">أسئلة متكررة (FAQ)</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'أسئلة متكررة' : 'Frequently Asked Questions' }}</h2>
             <div class="faq-list">
+                @foreach($faqs as $faq)
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span>كيف يمكنني تحميل المنتج بعد الشراء؟</span>
+                        <span>{{ $faq['question'] ?? '' }}</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </div>
                     <div class="faq-answer">
-                        <p>بعد الشراء، ستحصل على رابط تحميل فوري عبر البريد الإلكتروني. يمكنك تحميل المنتج مباشرة.</p>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
                     </div>
                 </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل المنتجات أصلية ومرخصة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، جميع المنتجات أصلية ومرخصة مع ضمان الجودة الكامل.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل أحصل على تحديثات مجانية؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، جميع التحديثات مجانية مدى الحياة بعد الشراء.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل يمكنني استرداد المبلغ؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، يمكنك استرداد المبلغ خلال 30 يوم من الشراء إذا لم تكن راضياً عن المنتج.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Order Form Section -->
     <section class="order-form-section">
@@ -355,12 +192,12 @@ $additionalFonts = '
         <div class="container">
 
             <div class="footer-bottom">
-                <p>Powered by sawa © {{ date('Y') }}</p>
+                <p>Powered by {{ $settings['site_name'] ?? 'DropSaas' }} © {{ date('Y') }}</p>
             </div>
         </div>
     </footer>
 
-    <script src="{{ asset('js/landing-digital-products.js') }}"></script>
+    <script src="{{ asset('js/landing-faq-toggle.js') }}"></script>
 </body>
 
 </html>

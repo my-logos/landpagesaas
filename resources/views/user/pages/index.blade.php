@@ -464,8 +464,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-pages.css') }}">
-<link rel="stylesheet" href="{{ asset('css/user-pages-new.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

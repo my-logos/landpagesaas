@@ -4,7 +4,7 @@
         @auth
         <h2>{{ $t('messages.dashboard') }}</h2>
         @else
-        <h2>{{ $settings['site_name'] ?? config('app.name', 'sawa') }}</h2>
+        <h2>{{ $settings['site_name'] ?? config('app.name', 'DropSaas') }}</h2>
         @endauth
     </div>
     <div class="ls-topbar-actions">
@@ -12,8 +12,8 @@
 
         @auth
         <a href="{{ (method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin()) ? route('admin.dashboard') : route('user.dashboard') }}" class="lang-switch">{{ $t('messages.dashboard') }}</a>
-        <form method="POST" action="{{ route('logout') }}">@csrf
-            <button type="submit" class="lang-switch">{{ $t('messages.logout') }}</button>
+        <form method="POST" action="{{ route('logout') }}" style="display: inline;">@csrf
+            <button type="submit" class="btn-logout-topbar">{{ $t('messages.logout') }}</button>
         </form>
         @else
         <a href="{{ route('login') }}" class="lang-switch">{{ $t('messages.login') }}</a>

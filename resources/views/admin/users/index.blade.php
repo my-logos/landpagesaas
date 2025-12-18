@@ -2,9 +2,22 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.users') ?? 'Users' }}</h1>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'Add New' }}</a>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.users') ?? 'المستخدمون' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.users.messaging') }}" class="btn btn-success">{{ $t('messages.message_users') ?? 'Message Users' }}</a>
+            <a href="{{ route('admin.users.export-emails') }}" class="btn btn-info">{{ $t('messages.export_emails') ?? 'Export Emails' }}</a>
+            <a href="{{ route('admin.users.export-phones') }}" class="btn btn-info">{{ $t('messages.export_phones') ?? 'Export Phones' }}</a>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'Add New' }}</a>
+        </div>
     </div>
 
     <div class="chart-card">
@@ -54,6 +67,14 @@
                                     {{ $user->email_verified_at ? ($t('messages.unverify_email') ?? 'Unverify') : ($t('messages.verify_email') ?? 'Verify') }}
                                 </button>
                             </form>
+                            @if(!$user->email_verified_at)
+                            <form method="POST" action="{{ route('admin.users.resend-verification', $user) }}" class="inline-form">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-warning" title="{{ $t('messages.resend_verification_email') ?? 'Resend Verification Email' }}">
+                                    {{ $t('messages.resend_verification') ?? 'Resend Verification' }}
+                                </button>
+                            </form>
+                            @endif
                             <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline-form">
                                 @csrf
                                 @method('DELETE')

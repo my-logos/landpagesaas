@@ -19,6 +19,7 @@ class SubscriptionPackage extends Model
         'products_limit',
         'daily_orders_limit',
         'monthly_orders_limit',
+        'monthly_support_tickets_limit',
         'features', // json
     ];
 
@@ -30,6 +31,7 @@ class SubscriptionPackage extends Model
         'products_limit' => 'integer',
         'daily_orders_limit' => 'integer',
         'monthly_orders_limit' => 'integer',
+        'monthly_support_tickets_limit' => 'integer',
     ];
 
     /**

@@ -33,6 +33,7 @@ class User extends Authenticatable
         'include_session_data',
         'include_location_data',
         'include_device_type',
+        'tips_disabled',
     ];
 
     /**
@@ -59,6 +60,7 @@ class User extends Authenticatable
         'include_session_data' => 'boolean',
         'include_location_data' => 'boolean',
         'include_device_type' => 'boolean',
+        'tips_disabled' => 'boolean',
     ];
 
     /**
@@ -103,6 +105,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: user has many support tickets
+     */
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(\App\Models\SupportTicket::class);
+    }
+
+    /**
+     * Relationship: user has many support ticket replies
+     */
+    public function supportTicketReplies(): HasMany
+    {
+        return $this->hasMany(\App\Models\SupportTicketReply::class);
+    }
+
+    /**
+     * Relationship: user has many support ticket counts
+     */
+    public function supportTicketCounts(): HasMany
+    {
+        return $this->hasMany(\App\Models\UserSupportTicketCount::class);
+    }
+
+    /**
      * Relationship: user has many transactions
      */
     public function transactions(): HasMany
@@ -135,6 +161,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: user has many messages
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(\App\Models\Message::class);
+    }
+
+    /**
+     * Relationship: user has many message replies
+     */
+    public function messageReplies(): HasMany
+    {
+        return $this->hasMany(\App\Models\MessageReply::class);
+    }
+
+    /**
      * Quick helper to check admin
      */
     public function isAdmin(): bool
@@ -148,5 +190,23 @@ class User extends Authenticatable
         }
 
         return ($this->role ?? '') === 'admin';
+    }
+
+    /**
+     * Determine if the user has verified their email address.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Mark the given user's email as verified.
+     */
+    public function markEmailAsVerified(): bool
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
     }
 }

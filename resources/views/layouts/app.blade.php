@@ -10,20 +10,13 @@
     <meta name="keywords" content="{{ $settings['seo_keywords'] ?? '' }}">
     <!-- Font Awesome 7 - Latest Version with Colors -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{ asset('css/landing-saas.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/landing-home.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/loading-bar.css') }}">
-    @if(auth()->check())
-    <link rel="stylesheet" href="{{ asset('css/user-dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/user-dashboard-extended.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/user-common.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/user-modals.css') }}">
-    @endif
+    <!-- Main CSS - Unified file containing all styles -->
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     @stack('styles')
     @stack('head')
 </head>
 
-<body class="ls-app">
+<body class="ls-app" data-env="{{ config('app.env', 'local') }}">
     @auth
     @if(auth()->user()->isAdmin())
     @include('partials.sidebar')
@@ -58,10 +51,11 @@
         </div>
     </div>
 
-    <div class="floating-actions">
-        <div class="fab" title="help">?</div>
-    </div>
+    @include('partials.fixed-help-icon')
 
+    @if(config('app.env') === 'production')
+    <script src="{{ asset('js/console-disable.js') }}"></script>
+    @endif
     <script src="{{ asset('js/landing-saas.js') }}"></script>
     <script src="{{ asset('js/language-switcher.js') }}"></script>
     <script src="{{ asset('js/loading-bar.js') }}"></script>

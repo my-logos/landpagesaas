@@ -20,6 +20,7 @@ class AccountActivated extends Mailable
 
     public function build()
     {
-        return $this->subject('تفعيل حسابك')->view('emails.account_activated');
+        return $this->subject('Account Activated - ' . config('app.name'))
+            ->view('emails.account_activated');
     }
 }

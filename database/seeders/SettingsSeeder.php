@@ -13,11 +13,11 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $defaults = [
-            'site_name' => 'Sawa',
+            'site_name' => 'DropSaas',
             'site_logo' => null,
-            'site_email' => 'info@Sawa.com',
+            'site_email' => 'info@DropSaas.com',
             'site_phone' => '+201234567890',
-            'seo_title' => 'Sawa - Create Professional Landing Pages',
+            'seo_title' => 'DropSaas - Create Professional Landing Pages',
             'seo_description' => 'Enjoy creating simple and effective landing pages',
             'seo_keywords' => 'landing pages, e-commerce, saas',
             'currency_code' => 'EGP',

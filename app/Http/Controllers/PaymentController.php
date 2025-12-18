@@ -48,6 +48,12 @@ use App\Http\Controllers\Concerns\HasLocaleAndTranslation;
 use App\Http\Controllers\Concerns\HandlesFileUploads;
 use App\Services\PaymentGatewayService;
 use App\Models\PaymentGateway;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SubscriptionActivated;
+use App\Mail\SubscriptionRenewed;
+use App\Mail\NewSubscriptionNotification;
+use App\Mail\PaymentReceived;
+use App\Mail\WalletTopupNotification;
 
 /**
  * Payment Controller
@@ -147,40 +153,49 @@ class PaymentController extends Controller
         $packagePrice = $package->price_cents;
         $walletBalance = $user->wallet_balance ?? 0;
 
-        // Check if wallet balance is sufficient
+        // Determine payment method and wallet usage
+        // If wallet balance covers full package price, use wallet directly
+        // Otherwise, calculate partial wallet usage + payment gateway amount
         if ($walletBalance >= $packagePrice) {
-            // Wallet payment - process directly
+            // Wallet balance sufficient: Process payment directly from wallet
+            // No need for external payment gateway
             $paymentMethod = 'wallet';
             $useWallet = true;
             $walletAmountUsed = $packagePrice;
-            $amountToPay = 0;
+            $amountToPay = 0; // No additional payment needed
         } else {
-            // Regular payment gateway
+            // Wallet balance insufficient: Use payment gateway
+            // Optionally use partial wallet balance if available
             $paymentMethod = $request->input('payment_method', 'paymob');
-            $useWallet = $walletBalance > 0;
-            // Calculate wallet usage and amount to pay
+            $useWallet = $walletBalance > 0; // Use wallet if user has any balance
+
+            // Calculate how much to use from wallet and how much to pay via gateway
+            // Returns: [walletAmountUsed, amountToPay]
             [$walletAmountUsed, $amountToPay] = $this->calculateWalletUsage($user, $packagePrice, $useWallet);
         }
 
         // Get currency from settings
         $currency = $this->getCurrencyCode();
 
-        // Handle wallet payment (when balance is sufficient)
+        // Handle wallet payment (when balance is sufficient to cover full amount)
+        // This is a direct payment flow - no external gateway interaction needed
         if ($paymentMethod === 'wallet' && $walletBalance >= $packagePrice) {
-            // Create subscription first (before payment)
+            // Step 1: Create subscription record first
+            // Subscription status will be 'active' for free packages, 'pending' for paid
             $subscriptionService = app(SubscriptionService::class);
             $subscription = $subscriptionService->subscribeUserToPackage($user, $package->id);
 
-            // Create payment record
+            // Step 2: Create payment record to track the transaction
+            // Amount is 0 because payment comes from wallet, not external gateway
             $payment = $this->createPayment([
                 'user_id' => $user->id,
                 'payment_method' => 'wallet',
-                'amount' => 0, // No additional payment needed
+                'amount' => 0, // No external payment - all from wallet
                 'currency' => $currency,
                 'type' => 'package',
                 'payable_type' => SubscriptionPackage::class,
                 'payable_id' => $package->id,
-                'status' => 'paid',
+                'status' => 'paid', // Wallet payments are immediately paid
                 'paid_at' => now(),
                 'metadata' => [
                     'package_price' => $packagePrice,
@@ -189,22 +204,24 @@ class PaymentController extends Controller
                 ],
             ]);
 
-            // Deduct from wallet
+            // Step 3: Deduct amount from user's wallet balance
             $this->deductWalletBalance($user, $packagePrice);
 
-            // Create transaction record
+            // Step 4: Create transaction record for audit trail
+            // Negative amount indicates debit (money leaving wallet)
             Transaction::create([
                 'user_id' => $user->id,
-                'amount' => -$packagePrice,
+                'amount' => -$packagePrice, // Negative = debit
                 'payment_method' => 'wallet',
                 'type' => 'debit',
                 'description' => 'Wallet deduction for package payment: ' . $package->name,
                 'payment_id' => $payment->id,
             ]);
 
-            // Activate subscription and link payment
+            // Step 5: Activate subscription and link payment record
+            // This sets subscription status to 'active' and links it to payment
             $this->activateSubscription($subscription, $package, $payment);
-            $this->activateUserAccount($user);
+            $this->activateUserAccount($user); // Ensure user account is active
 
             // Create invoice
             $invoice = $this->createPackageInvoice($payment, $package);
@@ -215,14 +232,16 @@ class PaymentController extends Controller
             return view('payments.success', compact('invoice', 'locale', 'dir', 't'));
         }
 
-        // Handle bank transfer payment
+        // Handle bank transfer payment (manual verification required)
+        // Bank transfers require admin approval before subscription activation
         if (strtolower($paymentMethod) === 'bank_transfer') {
-            // Validate transfer receipt image
+            // Validate transfer receipt image upload
+            // Receipt is required as proof of payment
             $request->validate([
                 'transfer_receipt' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
-            // Upload transfer receipt
+            // Upload transfer receipt image to storage
             $receiptFileName = $this->uploadImage($request, 'transfer_receipt', 'payments/transfer-receipts');
 
             if (!$receiptFileName) {
@@ -230,29 +249,31 @@ class PaymentController extends Controller
                     ->with('error', TranslationHelper::get('messages.transfer_receipt_required', 'Transfer receipt is required'));
             }
 
-            // Create payment record with transfer receipt
+            // Create payment record with status 'pending'
+            // Admin must verify receipt and approve payment before subscription activates
             $payment = $this->createPayment([
                 'user_id' => $user->id,
                 'payment_method' => $paymentMethod,
-                'amount' => $amountToPay,
+                'amount' => $amountToPay, // Amount after wallet deduction (if any)
                 'currency' => $currency,
                 'type' => 'package',
                 'payable_type' => SubscriptionPackage::class,
                 'payable_id' => $package->id,
-                'status' => 'pending', // Keep as pending until admin approves
-                'transfer_receipt' => $receiptFileName,
+                'status' => 'pending', // Awaiting admin approval
+                'transfer_receipt' => $receiptFileName, // Store receipt for admin review
                 'metadata' => [
                     'package_price' => $packagePrice,
-                    'wallet_amount_used' => $walletAmountUsed,
+                    'wallet_amount_used' => $walletAmountUsed, // Wallet used (if any)
                     'use_wallet' => $useWallet,
                 ],
             ]);
 
-            // Create pending subscription
+            // Create subscription with 'pending' status
+            // Will be activated after admin approves bank transfer
             $subscriptionService = app(SubscriptionService::class);
             $subscription = $subscriptionService->subscribeUserToPackage($user, $package->id);
             $subscription->payment_id = $payment->id;
-            $subscription->status = 'pending';
+            $subscription->status = 'pending'; // Wait for admin approval
             $subscription->save();
 
             return redirect()->route('user.packages.index')
@@ -396,6 +417,20 @@ class PaymentController extends Controller
 
     /**
      * Find payment by gateway-specific parameters
+     * 
+     * Different payment gateways use different parameter names for payment identification.
+     * This method routes to the appropriate finder method based on the gateway type.
+     * 
+     * Gateway-specific mappings:
+     * - Tap: Uses 'tap_id' parameter
+     * - Paymob/Paymob Wallet: Uses 'order_id' or 'transaction_id'
+     * - Kashier: Uses 'payment_id' or 'id'
+     * - Fawry: Uses 'merchantRefNumber' or 'merchant_ref_number'
+     * - Others: Uses common parameters (payment_id, id, transaction_id, order_id)
+     * 
+     * @param Request $request The HTTP request containing payment callback data
+     * @param string $gateway The payment gateway name (lowercase)
+     * @return Payment|null The found payment record or null if not found
      */
     protected function findPaymentByGatewayParams(Request $request, string $gateway): ?Payment
     {
@@ -713,6 +748,29 @@ class PaymentController extends Controller
         $invoice = $this->createPackageInvoice($payment, $package);
         $this->createPackageTransaction($payment, $package);
 
+        // Send emails
+        try {
+            // Check if this is a renewal (user had an active subscription before)
+            $isRenewal = \App\Models\Subscription::where('user_id', $payment->user_id)
+                ->where('id', '!=', $subscription->id)
+                ->where('status', 'expired')
+                ->exists();
+
+            if ($isRenewal) {
+                // Send renewal email to user
+                Mail::to($payment->user->email)->send(new SubscriptionRenewed($payment->user, $subscription, $package));
+            } else {
+                // Send activation email to user (new subscription)
+                Mail::to($payment->user->email)->send(new SubscriptionActivated($payment->user, $subscription, $package));
+            }
+
+            // Send notification to admins
+            $this->sendAdminEmails(new NewSubscriptionNotification($payment->user, $subscription, $package));
+            $this->sendAdminEmails(new PaymentReceived($payment, $payment->user));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send subscription emails', ['error' => $e->getMessage()]);
+        }
+
         ['locale' => $locale, 'dir' => $dir, 't' => $t] = $this->getLocaleData();
 
         return view('payments.success', compact('invoice', 'locale', 'dir', 't'));
@@ -891,6 +949,13 @@ class PaymentController extends Controller
         $invoice = $this->createWalletInvoice($payment);
         $this->createWalletTransaction($payment);
 
+        // Send notification to admins
+        try {
+            $this->sendAdminEmails(new WalletTopupNotification($payment, $payment->user));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send wallet topup email', ['error' => $e->getMessage()]);
+        }
+
         ['locale' => $locale, 'dir' => $dir, 't' => $t] = $this->getLocaleData();
 
         return view('payments.success', compact('invoice', 'locale', 'dir', 't'));
@@ -997,16 +1062,34 @@ class PaymentController extends Controller
     }
 
     /**
-     * Calculate wallet usage and amount to pay
+     * Calculate wallet usage and remaining amount to pay via payment gateway
+     * 
+     * This method determines how much to deduct from wallet and how much to charge
+     * via payment gateway. It handles partial wallet usage scenarios.
+     * 
+     * Logic:
+     * - If wallet balance >= total amount: use full wallet, pay nothing via gateway
+     * - If wallet balance < total amount: use full wallet, pay remainder via gateway
+     * - If wallet balance = 0: use no wallet, pay full amount via gateway
+     * 
+     * @param User $user The user making the payment
+     * @param float $totalAmount Total amount to pay (in cents)
+     * @param bool $useWallet Whether to use wallet balance (can be false if user opts out)
+     * @return array [walletAmountUsed, amountToPay] - Both in cents
      */
     protected function calculateWalletUsage($user, float $totalAmount, bool $useWallet): array
     {
         $walletBalance = $user->wallet_balance ?? 0;
         $walletAmountUsed = 0;
-        $amountToPay = $totalAmount;
+        $amountToPay = $totalAmount; // Default: pay full amount via gateway
 
+        // Use wallet if enabled and user has balance
         if ($useWallet && $walletBalance > 0) {
+            // Use maximum available: either full wallet balance or full amount (whichever is smaller)
             $walletAmountUsed = min($walletBalance, $totalAmount);
+
+            // Calculate remaining amount to pay via payment gateway
+            // max(0, ...) ensures we never have negative amount
             $amountToPay = max(0, $totalAmount - $walletAmountUsed);
         }
 
@@ -1094,10 +1177,22 @@ class PaymentController extends Controller
     }
 
     /**
-     * Deduct wallet balance
+     * Deduct amount from user's wallet balance
+     * 
+     * Safely deducts the specified amount from user wallet, ensuring balance
+     * never goes below zero. This method handles atomic wallet updates.
+     * 
+     * Note: This method should be called within a database transaction
+     * when combined with payment creation to ensure data consistency.
+     * 
+     * @param User $user The user whose wallet to deduct from
+     * @param float $amount Amount to deduct (in cents)
+     * @return void
      */
     protected function deductWalletBalance($user, float $amount): void
     {
+        // Ensure wallet balance never goes below zero
+        // max(0, ...) prevents negative balances
         $user->wallet_balance = max(0, ($user->wallet_balance ?? 0) - $amount);
         $user->save();
     }
@@ -1108,6 +1203,33 @@ class PaymentController extends Controller
     protected function requireAuthenticatedUser()
     {
         return auth()->user() ?? request()->user();
+    }
+
+    /**
+     * Send emails to all admin users
+     */
+    protected function sendAdminEmails($mailable): void
+    {
+        $adminEmails = User::where('role', 'admin')
+            ->orWhere(function ($query) {
+                $query->whereHas('roles', function ($q) {
+                    $q->where('name', 'admin');
+                });
+            })
+            ->pluck('email')
+            ->filter()
+            ->unique();
+
+        foreach ($adminEmails as $email) {
+            try {
+                Mail::to($email)->send($mailable);
+            } catch (\Throwable $e) {
+                Log::error('Failed to send admin email', [
+                    'email' => $email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 
     /**

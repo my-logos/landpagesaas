@@ -21,7 +21,7 @@
                     <div id="modal-sizes-container" data-size-name-placeholder="{{ $t('messages.size_name') ?? 'Size name' }}">
                         <!-- Sizes will be loaded here -->
                     </div>
-                    <button type="button" class="btn-add-variation" onclick="addModalVariation('sizes')">
+                    <button type="button" class="btn" data-variation-type="sizes">
                         <i class="fa-solid fa-plus"></i>
                         {{ $t('messages.add_size') ?? 'إضافة مقاس' }}
                     </button>
@@ -33,7 +33,7 @@
                     <div id="modal-colors-container" data-color-name-placeholder="{{ $t('messages.color_name') ?? 'Color name' }}" data-color-code-placeholder="{{ $t('messages.color_code_or_image') ?? 'Color code (#FF0000) or image URL' }}">
                         <!-- Colors will be loaded here -->
                     </div>
-                    <button type="button" class="btn-add-variation" onclick="addModalVariation('colors')">
+                    <button type="button" class="btn" data-variation-type="colors">
                         <i class="fa-solid fa-plus"></i>
                         {{ $t('messages.add_color') ?? 'إضافة لون' }}
                     </button>

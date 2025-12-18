@@ -9,7 +9,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\TranslationHelper;
+use App\Mail\OrderStatusUpdate;
 use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller
@@ -362,12 +365,30 @@ class OrdersController extends Controller
         ]);
 
         $oldStatus = $order->shipping_status;
-        $order->shipping_status = $request->input('shipping_status');
+        $newStatus = $request->input('shipping_status');
+        $order->shipping_status = $newStatus;
         $order->save();
 
         // Send webhook event if status changed
-        if ($oldStatus !== $order->shipping_status) {
+        if ($oldStatus !== $newStatus) {
             $this->sendWebhookEvent('order_status_updated', $order);
+
+            // Send email notification to customer if status changed
+            $order->load('product');
+            $customerEmail = $order->customer_data['email'] ?? null;
+            if ($customerEmail) {
+                try {
+                    Mail::to($customerEmail)->send(new OrderStatusUpdate($order, $oldStatus, $newStatus));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send order status update email to customer', [
+                        'order_id' => $order->id,
+                        'customer_email' => $customerEmail,
+                        'old_status' => $oldStatus,
+                        'new_status' => $newStatus,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
         }
 
         return redirect()->route('user.orders.index')

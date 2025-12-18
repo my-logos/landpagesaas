@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\AccountActivated;
+use App\Mail\EmailVerification;
 use App\Helpers\TranslationHelper;
 
 class RegistrationController extends Controller
@@ -65,12 +67,17 @@ class RegistrationController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\d{6,15}$/'],
-            'country_code' => ['nullable', 'string', 'max:4', 'regex:/^[1-9]\d{0,3}$/'],
+            'phone' => ['required', 'string', 'max:20', 'regex:/^\d{6,15}$/'],
+            'country_code' => ['required', 'string', 'max:4', 'regex:/^[1-9]\d{0,3}$/'],
         ]);
 
-        // Combine country code with phone if provided
-        $phoneNumber = $this->formatPhoneNumber($data['phone'] ?? null, $data['country_code'] ?? null);
+        // Combine country code with phone
+        $phoneNumber = $this->formatPhoneNumber($data['phone'], $data['country_code']);
+
+        // Check if phone number is already taken
+        if (User::where('phone', $phoneNumber)->exists()) {
+            return back()->withErrors(['phone' => TranslationHelper::get('messages.phone_already_taken', 'This phone number is already registered.')])->withInput();
+        }
 
         $user = User::create([
             'name' => $data['name'],
@@ -85,6 +92,16 @@ class RegistrationController extends Controller
 
         // Refresh user to pick up any changes (is_active, subscription)
         $user->refresh();
+
+        // Send email verification email to all new users
+        try {
+            Mail::to($user->email)->send(new EmailVerification($user));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send email verification', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         // If user is active (e.g., auto-subscribed to a free package) => login and send activation email
         if ($user->is_active) {
@@ -130,12 +147,8 @@ class RegistrationController extends Controller
     /**
      * Format phone number with country code
      */
-    protected function formatPhoneNumber(?string $phone, ?string $countryCode): ?string
+    protected function formatPhoneNumber(string $phone, string $countryCode): string
     {
-        if (empty($phone)) {
-            return null;
-        }
-
         $countryCode = !empty($countryCode) ? '+' . $countryCode : '+20';
         return $countryCode . $phone;
     }
@@ -150,10 +163,13 @@ class RegistrationController extends Controller
         try {
             Mail::to($user->email)->send(new AccountActivated($user));
         } catch (\Throwable $e) {
-            // swallow mail errors, but log if needed
+            Log::error('Failed to send account activation email', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
         }
 
-        return redirect()->route('user.products.create.step1')
+        return redirect()->route('user.dashboard')
             ->with('success', TranslationHelper::get('messages.registration_success'));
     }
 }

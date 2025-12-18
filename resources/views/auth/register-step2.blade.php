@@ -73,7 +73,7 @@
             </div>
 
             <div class="auth-field">
-                <label>{{ $t('messages.phone') }} ({{ $t('messages.optional') }})</label>
+                <label>{{ $t('messages.phone') }} *</label>
                 <div class="auth-phone-wrapper">
                     <div class="auth-country-code-wrapper">
                         <span class="auth-country-code-prefix">+</span>
@@ -95,7 +95,8 @@
                             type="tel"
                             class="form-control auth-input auth-phone-input"
                             placeholder="{{ $t('messages.phone_number') }}"
-                            data-validate="phone" />
+                            data-validate="phone"
+                            required />
                         <i class="fa-solid fa-phone auth-input-icon {{ $dir === 'rtl' ? 'right' : 'left' }}"></i>
                         <span class="auth-phone-validation"></span>
                     </div>

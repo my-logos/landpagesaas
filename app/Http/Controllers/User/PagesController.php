@@ -77,18 +77,14 @@ class PagesController extends Controller
         $additionalSalesEnabled = $user->additional_sales_enabled ?? false;
 
         // Calculate progress steps
+        // Optimized: Use query count instead of loading all pages then filtering
         $hasPages = $pages->count() > 0;
-        $hasPublishedPages = $pages->where('status', 'published')->count() > 0;
+        $hasPublishedPages = $user->pages()->where('status', 'published')->count() > 0;
         $currentPackage = $subscriptionData['package'] ?? null;
         $isFreePlan = !$currentPackage || ($currentPackage && ($currentPackage->is_free || $currentPackage->name === 'Free'));
 
         // Get package features for enabling/disabling pixel fields in modals
-        $packageFeatures = [
-            'facebook_pixel' => $currentPackage ? $currentPackage->hasFeature('facebook_pixel') : false,
-            'tiktok_pixel' => $currentPackage ? $currentPackage->hasFeature('tiktok_pixel') : false,
-            'snapchat_pixel' => $currentPackage ? $currentPackage->hasFeature('snapchat_pixel') : false,
-            'google_analytics' => $currentPackage ? $currentPackage->hasFeature('google_analytics') : false,
-        ];
+        $packageFeatures = $this->getPackageFeatures($currentPackage);
 
         $completedSteps = 0;
         if ($hasPages) $completedSteps++;
@@ -153,12 +149,7 @@ class PagesController extends Controller
         $aiAvailable = $aiService->isAvailable();
 
         // Get package features for enabling/disabling pixel fields
-        $packageFeatures = [
-            'facebook_pixel' => $currentPackage ? $currentPackage->hasFeature('facebook_pixel') : false,
-            'tiktok_pixel' => $currentPackage ? $currentPackage->hasFeature('tiktok_pixel') : false,
-            'snapchat_pixel' => $currentPackage ? $currentPackage->hasFeature('snapchat_pixel') : false,
-            'google_analytics' => $currentPackage ? $currentPackage->hasFeature('google_analytics') : false,
-        ];
+        $packageFeatures = $this->getPackageFeatures($currentPackage);
 
         // Check if free plan
         $isFreePlan = !$currentPackage || ($currentPackage && ($currentPackage->is_free || $currentPackage->name === 'Free'));
@@ -299,33 +290,10 @@ class PagesController extends Controller
             // Get language from request (required field now)
             $language = $validated['language'] ?? app()->getLocale();
 
-            // If product exists, generate AI content for description, features, and FAQs
-            $aiContent = null;
-            if ($product) {
-                $aiService = app(\App\Services\PageGenerationService::class);
-
-                // Generate AI content
-                $aiResult = $aiService->generateClassicPageContent($product, $language);
-
-                if ($aiResult['success'] && isset($aiResult['content'])) {
-                    // Store AI-generated content as JSON in the content field
-                    $aiContent = $aiResult['content'];
-                    // Ensure language is set in content
-                    $aiContent['language'] = $language;
-                    $data['content'] = json_encode($aiContent);
-                } else {
-                    // If AI generation fails, log error but continue without AI content
-                    Log::warning('Failed to generate AI content for classic page', [
-                        'product_id' => $product->id,
-                        'error' => $aiResult['message'] ?? 'Unknown error'
-                    ]);
-                    // Store language even if AI fails
-                    $data['content'] = json_encode(['language' => $language]);
-                }
-            } else {
-                // No product, just store language in content
-                $data['content'] = json_encode(['language' => $language]);
-            }
+            // Store language in content initially (use JSON_UNESCAPED_UNICODE to preserve Arabic text)
+            $data['content'] = json_encode(['language' => $language], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $data['generation_status'] = 'pending';
+            $data['generation_error'] = null;
 
             // Apply package limits
             $data = $this->applyPackageLimits($data, $user);
@@ -335,6 +303,14 @@ class PagesController extends Controller
 
             // Update slug with actual page ID
             $this->updatePageSlug($page);
+
+            // If product exists, dispatch job to generate AI content in background
+            if ($product) {
+                \App\Jobs\GenerateClassicPageContentJob::dispatch($page, $product, $language);
+            } else {
+                // No product, mark as completed immediately
+                $page->update(['generation_status' => 'completed']);
+            }
 
             return redirect()->route('user.pages.index')
                 ->with('success', $this->getTranslatedMessage('messages.page_created', 'Page created successfully'));
@@ -452,12 +428,7 @@ class PagesController extends Controller
         $aiAvailable = $aiService->isAvailable();
 
         // Get package features for enabling/disabling pixel fields
-        $packageFeatures = [
-            'facebook_pixel' => $currentPackage ? $currentPackage->hasFeature('facebook_pixel') : false,
-            'tiktok_pixel' => $currentPackage ? $currentPackage->hasFeature('tiktok_pixel') : false,
-            'snapchat_pixel' => $currentPackage ? $currentPackage->hasFeature('snapchat_pixel') : false,
-            'google_analytics' => $currentPackage ? $currentPackage->hasFeature('google_analytics') : false,
-        ];
+        $packageFeatures = $this->getPackageFeatures($currentPackage);
 
         // Check if free plan
         $isFreePlan = !$currentPackage || ($currentPackage && ($currentPackage->is_free || $currentPackage->name === 'Free'));
@@ -589,30 +560,20 @@ class PagesController extends Controller
                 $product = Product::find($validated['product_id']);
             }
 
-            // If product exists, regenerate AI content
-            if ($product) {
-                $aiService = app(\App\Services\PageGenerationService::class);
-                $aiResult = $aiService->generateClassicPageContent($product, $language);
+            // Update generation status and language
+            $data['generation_status'] = 'pending';
+            $data['generation_error'] = null;
 
-                if ($aiResult['success'] && isset($aiResult['content'])) {
-                    // Store AI-generated content as JSON in the content field
-                    $currentContent = $aiResult['content'];
-                    $currentContent['language'] = $language;
-                    $data['content'] = json_encode($currentContent);
-                } else {
-                    // If AI generation fails, keep existing content but update language
-                    $currentContent['language'] = $language;
-                    $data['content'] = json_encode($currentContent);
-                    Log::warning('Failed to regenerate AI content for classic page', [
-                        'page_id' => $page->id,
-                        'product_id' => $product->id,
-                        'error' => $aiResult['message'] ?? 'Unknown error'
-                    ]);
-                }
+            // Update language in content (use JSON_UNESCAPED_UNICODE to preserve Arabic text)
+            $currentContent['language'] = $language;
+            $data['content'] = json_encode($currentContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            // If product exists, dispatch job to regenerate AI content in background
+            if ($product) {
+                \App\Jobs\GenerateClassicPageContentJob::dispatch($page, $product, $language);
             } else {
-                // No product, just update language in content
-                $currentContent['language'] = $language;
-                $data['content'] = json_encode($currentContent);
+                // No product, mark as completed immediately
+                $data['generation_status'] = 'completed';
             }
 
             // Prepare page data

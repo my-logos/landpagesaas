@@ -2,9 +2,19 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.landing_page_templates') ?? 'Landing Page Templates' }}</h1>
-        <a href="{{ route('admin.landing-page-templates.create') }}" class="btn-save">{{ $t('messages.add_new') ?? 'Add New' }}</a>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.landing_page_templates') ?? 'تصاميم صفحات الهبوط' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.landing-page-templates.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'إضافة جديد' }}</a>
+        </div>
     </div>
 
     <div class="ls-card">
@@ -74,7 +84,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-templates.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

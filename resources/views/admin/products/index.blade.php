@@ -2,37 +2,55 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.products') ?? 'Products' }}</h1>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.products') ?? 'المنتجات' }}</h1>
+        </div>
     </div>
 
     <!-- Filters -->
     <div class="filter-section">
-        <form method="GET" action="{{ route('admin.products.index') }}" class="filter-form">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="search">{{ $t('messages.search') ?? 'Search' }}</label>
-                    <input type="text" id="search" name="search" class="form-control"
-                        value="{{ request('search') }}"
-                        placeholder="{{ $t('messages.search_by_product_name') ?? 'Search by product name' }}">
-                </div>
-                <div class="filter-group">
-                    <label for="user_id">{{ $t('messages.user') ?? 'User' }}</label>
-                    <select id="user_id" name="user_id" class="form-control">
-                        <option value="">{{ $t('messages.all_users') ?? 'All Users' }}</option>
-                        @foreach($users as $user)
-                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }} ({{ $user->email }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary">{{ $t('messages.filter') ?? 'Filter' }}</button>
-                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">{{ $t('messages.reset') ?? 'Reset' }}</a>
-                </div>
+        <div class="filter-header" id="filterToggle">
+            <div class="filter-header-title">
+                <i class="fa-solid fa-filter"></i>
+                <span>{{ $t('messages.filter') ?? 'Filter' }}</span>
             </div>
-        </form>
+            <i class="fa-solid fa-chevron-down" id="filterChevron"></i>
+        </div>
+
+        <div class="filter-content collapsed" id="filterContent">
+            <form method="GET" action="{{ route('admin.products.index') }}" class="filter-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="search">{{ $t('messages.search') ?? 'Search' }}</label>
+                        <input type="text" id="search" name="search" class="form-control"
+                            value="{{ request('search') }}"
+                            placeholder="{{ $t('messages.search_by_product_name') ?? 'Search by product name' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="user_id">{{ $t('messages.user') ?? 'User' }}</label>
+                        <select id="user_id" name="user_id" class="form-control">
+                            <option value="">{{ $t('messages.all_users') ?? 'All Users' }}</option>
+                            @foreach($users as $user)
+                            <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }} ({{ $user->email }})
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">{{ $t('messages.filter') ?? 'Filter' }}</button>
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">{{ $t('messages.reset') ?? 'Reset' }}</a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Products Table -->
@@ -91,4 +109,8 @@
         {{ $products->links() }}
     </div>
 </div>
+
+@push('scripts')
+<script src="{{ asset('js/admin-common.js') }}"></script>
+@endpush
 @endsection

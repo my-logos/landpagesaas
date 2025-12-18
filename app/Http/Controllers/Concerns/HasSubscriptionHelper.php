@@ -12,6 +12,25 @@ use Illuminate\Contracts\Auth\Authenticatable;
 trait HasSubscriptionHelper
 {
     /**
+     * Get package features array for pixel fields
+     * 
+     * Returns an array indicating which pixel/analytics features are enabled
+     * for the user's current package. Used to enable/disable pixel fields in forms.
+     * 
+     * @param mixed $package The subscription package (can be null)
+     * @return array Array with feature keys and boolean values
+     */
+    protected function getPackageFeatures($package): array
+    {
+        return [
+            'facebook_pixel' => $package ? $package->hasFeature('facebook_pixel') : false,
+            'tiktok_pixel' => $package ? $package->hasFeature('tiktok_pixel') : false,
+            'snapchat_pixel' => $package ? $package->hasFeature('snapchat_pixel') : false,
+            'google_analytics' => $package ? $package->hasFeature('google_analytics') : false,
+        ];
+    }
+
+    /**
      * Get the active or latest subscription for user
      */
     protected function getUserSubscription(Authenticatable $user = null): ?Subscription

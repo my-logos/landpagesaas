@@ -8,7 +8,7 @@
                 <i class="fa-solid fa-times"></i>
             </button>
             <div class="product-form-title-group">
-                <h1 class="dashboard-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h1>
+                <h1 class="page-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h1>
                 <h2 class="product-form-title">{{ isset($product) ? ($t('messages.edit_product') ?? 'Edit Product') : ($t('messages.add_new_product') ?? 'Add New Product') }}</h2>
             </div>
         </div>
@@ -148,10 +148,10 @@
             </div>
 
             <div class="form-actions visible">
-                <button type="button" class="btn-cancel">
+                <button type="button" class="btn">
                     {{ $t('messages.cancel') ?? 'Cancel' }}
                 </button>
-                <button type="submit" class="btn-save">
+                <button type="submit" class="btn">
                     {{ $t('messages.save_product') ?? 'Save Product' }}
                 </button>
             </div>
@@ -161,10 +161,9 @@
 
 @push('scripts')
 <script src="{{ asset('js/product-form.js') }}"></script>
-@if(isset($product) && $product->images)
-<script>
-    window.productImagesData = @json($product->images);
-</script>
-@endif
 @endpush
+
+@if(isset($product) && $product->images)
+<div id="product-images-data" data-images="{{ json_encode($product->images) }}" class="hidden"></div>
+@endif
 @endsection

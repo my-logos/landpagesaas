@@ -115,8 +115,8 @@
       </div>
 
       <div class="form-actions" id="formActions">
-        <button type="submit" class="btn-save">{{ $t('messages.save') }}</button>
-        <button type="button" class="btn-cancel" id="cancelEditBtn">{{ $t('messages.cancel') }}</button>
+        <button type="submit" class="btn">{{ $t('messages.save') }}</button>
+        <button type="button" class="btn" id="cancelEditBtn">{{ $t('messages.cancel') }}</button>
       </div>
     </form>
   </div>
@@ -167,8 +167,8 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn-save">{{ $t('messages.save') }}</button>
-        <button type="button" class="btn-cancel" id="reset-password-form-btn">{{ $t('messages.cancel') }}</button>
+        <button type="submit" class="btn">{{ $t('messages.save') }}</button>
+        <button type="button" class="btn" id="reset-password-form-btn">{{ $t('messages.cancel') }}</button>
       </div>
     </form>
   </div>

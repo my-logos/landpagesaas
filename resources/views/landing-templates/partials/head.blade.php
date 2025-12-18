@@ -22,7 +22,7 @@ $pageDir = $pageLanguage === 'ar' ? 'rtl' : 'ltr';
     @if($page->seo_keywords)
     <meta name="keywords" content="{{ $page->seo_keywords }}">
     @endif
-    <meta name="author" content="{{ $page->user->name ?? 'Sawa' }}">
+    <meta name="author" content="{{ $page->user->name ?? 'DropSaas' }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -59,9 +59,12 @@ $pageDir = $pageLanguage === 'ar' ? 'rtl' : 'ltr';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
 
     <!-- Template CSS (default to landing-default.css if not specified) -->
-    <link rel="stylesheet" href="{{ asset($templateCss ?? 'css/landing-default.css') }}">
+    <link rel="stylesheet" href="{{ asset($templateCss ?? 'landpage/css/landing-default.css') }}">
 
     @if($page->google_analytics_id || $page->facebook_pixel || $page->tiktok_pixel || $page->snapchat_pixel)
     <script src="{{ asset('js/landing-page-tracking.js') }}"></script>
     @endif
+
+    <!-- Landing Pages Unified JavaScript -->
+    <script src="{{ asset('landpage/js/landing-pages.js') }}"></script>
 </head>

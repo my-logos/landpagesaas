@@ -39,7 +39,7 @@ class FacebookConversionAPIController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        
+
         $subscriptionData = $this->getSubscriptionData($user);
         $currentPackage = $subscriptionData['package'];
         $hasFacebookConversionAPI = $currentPackage && $currentPackage->hasFeature('facebook_conversion_api');
@@ -69,8 +69,9 @@ class FacebookConversionAPIController extends Controller
         ]);
 
         $settings = FacebookConversionAPISetting::getForUser($user->id);
-        
-        // Update settings - هذه الإعدادات مربوطة تلقائياً بجميع صفحات الهبوط لنفس user_id
+
+        // Update Facebook Conversion API settings
+        // These settings are automatically linked to all landing pages for the same user_id
         $settings->update([
             'is_enabled' => $request->has('is_enabled') ? true : false,
             'pixel_id' => $validated['pixel_id'] ?? null,

@@ -145,7 +145,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-transactions.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

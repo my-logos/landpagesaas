@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">
+    <div class="page-header">
+        <h1 class="page-title">
             <span class="pro-badge">PRO</span>
             {{ $t('messages.facebook_conversion_api') ?? 'Facebook Conversion API' }}
             <i class="fa-brands fa-facebook"></i>
@@ -254,7 +254,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-facebook-conversion-api.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

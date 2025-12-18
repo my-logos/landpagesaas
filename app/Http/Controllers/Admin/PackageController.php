@@ -76,6 +76,7 @@ class PackageController extends BaseAdminController
             'products_limit' => ['nullable', 'integer', 'min:0'],
             'daily_orders_limit' => ['nullable', 'integer', 'min:0'],
             'monthly_orders_limit' => ['nullable', 'integer', 'min:0'],
+            'monthly_support_tickets_limit' => ['nullable', 'integer', 'min:0'],
             'features' => ['nullable', 'array'],
             'features.google_analytics' => ['sometimes', 'boolean'],
             'features.facebook_pixel' => ['sometimes', 'boolean'],

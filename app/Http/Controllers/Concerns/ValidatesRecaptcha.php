@@ -11,9 +11,17 @@ trait ValidatesRecaptcha
 {
     /**
      * Validate reCAPTCHA if enabled
+     * 
+     * Skips validation in test environment to allow testing without actual tokens.
+     * In production, validates reCAPTCHA v2 or v3 based on configuration.
      */
     protected function validateRecaptcha(Request $request): void
     {
+        // Skip reCAPTCHA validation in test environment
+        if (app()->environment('testing')) {
+            return;
+        }
+
         $recaptchaVersion = AdditionalSetting::getValue('recaptcha_version', 'none');
 
         if ($recaptchaVersion === 'none') {

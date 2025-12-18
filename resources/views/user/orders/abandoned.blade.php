@@ -8,8 +8,10 @@
     </div>
 
     <!-- Page Header -->
-    <div class="abandoned-orders-header">
-        <h1 class="abandoned-orders-title">{{ $t('messages.abandoned_orders_management') ?? 'Abandoned Orders Management' }}</h1>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.abandoned_orders_management') ?? 'Abandoned Orders Management' }}</h1>
+        </div>
     </div>
 
     <!-- Statistics and Actions -->
@@ -55,7 +57,7 @@
             </form>
         </div>
         <div class="filter-bar-right">
-            <button type="button" class="btn-filter-abandoned" onclick="document.querySelector('.search-form').submit();">
+            <button type="button" class="btn-filter-abandoned" data-submit-form=".search-form">
                 <i class="fa-solid fa-filter"></i>
                 {{ $t('messages.filter_abandoned_orders') ?? 'Filter Abandoned Orders' }}
             </button>
@@ -128,7 +130,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-abandoned-orders.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

@@ -36,7 +36,8 @@ class ProfileController extends BaseProfileController
     }
 
     /**
-     * تجاوز redirect مع الـ admin route
+     * Override redirect to use admin route
+     * Always redirect to admin.profile route regardless of the provided route parameter
      */
     protected function redirectWithSuccess(string $route, string $message)
     {

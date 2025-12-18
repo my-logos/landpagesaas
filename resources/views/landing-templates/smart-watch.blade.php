@@ -1,5 +1,5 @@
 @php
-$templateCss = 'css/landing-smart-watch.css';
+$templateCss = 'landpage/css/landing-smart-watch.css';
 $additionalFonts = '
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@ $additionalFonts = '
     @include('landing-templates.partials.page-features')
     <!-- Top Banner -->
     <div class="top-banner">
-        {{ $page->additional_description ?? 'لعرض حصري اشار الآن واحصل على خصم فوري، لغاية محدودة جدا!' }}
+        {{ $page->additional_description ?? '' }}
     </div>
 
     <!-- Hero Section -->
@@ -32,8 +32,12 @@ $additionalFonts = '
 
                 <div>
                     <h1 class="product-title">{{ $page->title ?? ($page->product->name ?? 'المنتج') }}</h1>
+                    @php
+                    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+                    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
+                    @endphp
                     <p class="product-description">
-                        {{ $page->content ?? ($page->product->description ?? 'أناقة لا تضاهى وإمكانيات لا حدود لها. تتبع خطواتك، نومك، ومكالماتك بكل سهولة.') }}
+                        {{ $heroDescription }}
                     </p>
 
                     @if($page->product)
@@ -65,40 +69,36 @@ $additionalFonts = '
     </section>
 
     <!-- Features Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $features = $aiContent['features'] ?? [];
+    @endphp
+    @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
+                    @if(isset($feature['icon']))
                     <div class="feature-icon">
-                        <i class="fa-solid fa-shield-check"></i>
+                        <i class="{{ $feature['icon'] }}"></i>
                     </div>
-                    <h3 class="feature-title">دفع أمن</h3>
-                    <p class="feature-description">نظام دفع آمن ومحمي بالكامل</p>
+                    @endif
+                    <h3 class="feature-title">{{ $feature['title'] ?? '' }}</h3>
+                    <p class="feature-description">{{ $feature['description'] ?? '' }}</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <h3 class="feature-title">شحن سريع</h3>
-                    <p class="feature-description">توصيل سريع لجميع المحافظات</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h3 class="feature-title">ضمان عام</h3>
-                    <p class="feature-description">ضمان شامل لمدة عام كامل</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-headset"></i>
-                    </div>
-                    <h3 class="feature-title">دعم فني</h3>
-                    <p class="feature-description">دعم فني متاح على مدار الساعة</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Product Details Section -->
     <section class="product-details-section">
@@ -245,22 +245,32 @@ $additionalFonts = '
     </section>
 
     <!-- FAQ Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $faqs = $aiContent['faqs'] ?? [];
+    @endphp
+    @if(!empty($faqs))
     <section class="faq-section">
         <div class="container">
-            <h2 class="section-title">أسئلة متكررة (FAQ)</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'أسئلة متكررة' : 'Frequently Asked Questions' }}</h2>
             <div class="faq-list">
+                @foreach($faqs as $faq)
                 <div class="faq-item">
-                    <div class="faq-question">هل الشحن مجاني داخل مصر؟</div>
+                    <div class="faq-question">
+                        <span>{{ $faq['question'] ?? '' }}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ $faq['answer'] ?? '' }}</p>
+                    </div>
                 </div>
-                <div class="faq-item">
-                    <div class="faq-question">ما هي طرق الدفع المتاحة؟</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">هل يمكنني إرجاع الساعة إذا لم تعجبني؟</div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Order Form Section -->
     <section class="order-form-section">
@@ -284,11 +294,11 @@ $additionalFonts = '
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>Powered by sawa © {{ date('Y') }}</p>
+            <p>Powered by {{ $settings['site_name'] ?? 'DropSaas' }} © {{ date('Y') }}</p>
         </div>
     </footer>
 
-    <script src="{{ asset('js/landing-smart-watch.js') }}"></script>
+    <script src="{{ asset('js/landing-faq-toggle.js') }}"></script>
 </body>
 
 </html>

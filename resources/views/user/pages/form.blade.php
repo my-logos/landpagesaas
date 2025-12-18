@@ -8,7 +8,7 @@
                 <i class="fa-solid fa-times"></i>
             </button>
             <div class="page-form-title-group">
-                <h1 class="dashboard-title">{{ $t('messages.control_panel') ?? 'لوحة التحكم' }}</h1>
+                <h1 class="page-title">{{ $t('messages.control_panel') ?? 'لوحة التحكم' }}</h1>
                 <h2 class="page-form-title">
                     @if(isset($page))
                     {{ $t('messages.edit_landing_page') ?? 'تعديل صفحة الهبوط' }}
@@ -205,7 +205,7 @@
                                 <input type="radio" name="template_id" id="template_{{ $template->id }}" value="{{ $template->id }}" {{ old('template_id', (isset($page) && $page->template_id == $template->id) ? $page->template_id : '') == $template->id ? 'checked' : '' }}>
                                 <div class="template-preview">
                                     @if($template->preview_image)
-                                    <img src="{{ asset('storage/' . $template->preview_image) }}" alt="{{ $template->name }}">
+                                    <img src="{{ asset('' . $template->preview_image) }}" alt="{{ $template->name }}">
                                     @else
                                     <i class="fa-solid fa-palette"></i>
                                     @endif
@@ -346,7 +346,7 @@
                             @endforeach
                             @endif
                         </div>
-                        <button type="button" class="btn-add-variation" data-action="add-variation" data-type="sizes">
+                        <button type="button" class="btn" data-action="add-variation" data-type="sizes">
                             <i class="fa-solid fa-plus"></i>
                             {{ $t('messages.add_size') ?? 'إضافة مقاس' }}
                         </button>
@@ -375,7 +375,7 @@
                             @endforeach
                             @endif
                         </div>
-                        <button type="button" class="btn-add-variation" data-action="add-variation" data-type="colors">
+                        <button type="button" class="btn" data-action="add-variation" data-type="colors">
                             <i class="fa-solid fa-plus"></i>
                             {{ $t('messages.add_color') ?? 'إضافة لون' }}
                         </button>
@@ -388,7 +388,7 @@
 
             <!-- Submit Button -->
             <div class="form-actions visible">
-                <button type="button" class="btn-cancel" data-action="close-form" data-route="{{ route('user.pages.index') }}">
+                <button type="button" class="btn" data-action="close-form" data-route="{{ route('user.pages.index') }}">
                     {{ $t('messages.cancel') ?? 'إلغاء' }}
                 </button>
                 <button type="submit" class="btn-create-page-submit" id="submitBtn">
@@ -410,6 +410,6 @@
 <script src="{{ asset('js/user-pages-form.js') }}"></script>
 @endpush
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-pages-form.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 @endsection

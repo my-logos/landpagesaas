@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.user_subscriptions') ?? 'User Subscriptions' }} - {{ $user->name }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $t('messages.user_subscriptions') ?? 'User Subscriptions' }} - {{ $user->name }}</h1>
     </div>
 
     <!-- Statistics -->

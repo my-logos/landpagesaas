@@ -1,5 +1,5 @@
 @php
-$templateCss = 'css/landing-fashion.css';
+$templateCss = 'landpage/css/landing-fashion.css';
 $additionalFonts = '
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@ $additionalFonts = '
     @include('landing-templates.partials.page-features')
     <!-- Top Banner -->
     <div class="top-banner">
-        {{ $page->additional_description ?? 'عرض حصري على الأزياء! احصلي على خصم فوري، العرض محدود!' }}
+        {{ $page->additional_description ?? '' }}
     </div>
 
     <!-- Hero Section - Elegant Classic Design -->
@@ -27,8 +27,12 @@ $additionalFonts = '
                     <div class="hero-label-elegant">أزياء عصرية</div>
                     <h1 class="hero-title-elegant">{{ $page->title ?? ($page->product->name ?? 'أزياء أنيقة') }}</h1>
                     <div class="hero-divider"></div>
+                    @php
+                    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+                    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
+                    @endphp
                     <p class="hero-description-elegant">
-                        {{ $page->content ?? ($page->product->description ?? 'اكتشفي مجموعتنا المميزة من الأزياء العصرية. تصميمات أنيقة وجودة عالية.') }}
+                        {{ $heroDescription }}
                     </p>
                     @if($page->product)
                     <div class="pricing-elegant">
@@ -79,41 +83,36 @@ $additionalFonts = '
     </section>
 
     <!-- Features Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $features = $aiContent['features'] ?? [];
+    @endphp
+    @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
-            <h2 class="section-title">لماذا تختارين أزياءنا؟</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
+                    @if(isset($feature['icon']))
                     <div class="feature-icon">
-                        <i class="fa-solid fa-gem"></i>
+                        <i class="{{ $feature['icon'] }}"></i>
                     </div>
-                    <h3 class="feature-title">جودة فاخرة</h3>
-                    <p class="feature-description">خامات عالية الجودة من أفضل المصادر</p>
+                    @endif
+                    <h3 class="feature-title">{{ $feature['title'] ?? '' }}</h3>
+                    <p class="feature-description">{{ $feature['description'] ?? '' }}</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-palette"></i>
-                    </div>
-                    <h3 class="feature-title">تصميمات عصرية</h3>
-                    <p class="feature-description">تصميمات أنيقة تناسب جميع الأذواق</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h3 class="feature-title">أزياء عالمية</h3>
-                    <p class="feature-description">تصميمات من أفضل دور الأزياء العالمية</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <h3 class="feature-title">تسليم سريع</h3>
-                    <p class="feature-description">تسليم سريع ومحترف لجميع المحافظات</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Product Gallery Section -->
     @if($page->product && $page->product->images)
@@ -134,195 +133,34 @@ $additionalFonts = '
     </section>
     @endif
 
-    <!-- Product Details Section -->
-    <section class="product-details-section">
-        <div class="container">
-            <div class="product-details-content">
-                <div class="details-image">
-                    @if($page->product && $page->product->images)
-                    @if($detailImage)
-                    <img src="{{ $detailImage }}" alt="Product Details">
-                    @endif
-                    @endif
-                </div>
-                <div class="details-text">
-                    <h2 class="details-title">مميزات المنتجات</h2>
-                    <ul class="details-list">
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-leaf"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>خامات طبيعية</strong>
-                                <span>خامات ناعمة وطبيعية تضمن الراحة الكاملة</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-ruler"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>مقاسات متنوعة</strong>
-                                <span>متوفر بجميع المقاسات لتناسب جميع الأجسام</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-palette"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>ألوان متنوعة</strong>
-                                <span>مجموعة واسعة من الألوان الأنثوية الأنيقة</span>
-                            </div>
-                        </li>
-                        <li class="details-item">
-                            <div class="details-icon">
-                                <i class="fa-solid fa-gift"></i>
-                            </div>
-                            <div class="details-text-content">
-                                <strong>تعبئة مميزة</strong>
-                                <span>تعبئة أنيقة ومميزة للهدايا</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Choose Section -->
-    <section class="why-choose-section">
-        <div class="container">
-            <h2 class="section-title">لماذا نحن الأفضل؟</h2>
-            <div class="why-choose-grid">
-                <div class="why-choose-card">
-                    <div class="why-choose-number">01</div>
-                    <h3 class="why-choose-title">جودة فاخرة</h3>
-                    <p class="why-choose-description">خامات عالية الجودة من أفضل المصادر العالمية</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">02</div>
-                    <h3 class="why-choose-title">أسعار مناسبة</h3>
-                    <p class="why-choose-description">أفضل الأسعار مع عروض وخصومات مستمرة</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">03</div>
-                    <h3 class="why-choose-title">خصوصية تامة</h3>
-                    <p class="why-choose-description">تعبئة خاصة تضمن الخصوصية الكاملة</p>
-                </div>
-                <div class="why-choose-card">
-                    <div class="why-choose-number">04</div>
-                    <h3 class="why-choose-title">ضمان الجودة</h3>
-                    <p class="why-choose-description">نضمن رضاك التام أو استرداد كامل المبلغ</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="container">
-            <h2 class="section-title">آراء عملائنا</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-pink">س</div>
-                        <div class="testimonial-info">
-                            <h4>سارة أحمد</h4>
-                            <p>(القاهرة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"جودة ممتازة وتصميمات أنيقة. الخامات ناعمة جداً والراحة لا مثيل لها. التعبئة كانت خاصة ومميزة."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-rose">م</div>
-                        <div class="testimonial-info">
-                            <h4>مريم علي</h4>
-                            <p>(الجيزة)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"أفضل متجر لانجيري. الجودة عالية والأسعار معقولة. الخصوصية مضمونة والتعبئة أنيقة."</p>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar testimonial-avatar-coral">ف</div>
-                        <div class="testimonial-info">
-                            <h4>فاطمة محمود</h4>
-                            <p>(الإسكندرية)</p>
-                        </div>
-                    </div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"خدمة رائعة وجودة فاخرة. التوصيل كان سريع والتعبئة خاصة. سأشتري مرة أخرى بالتأكيد."</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- FAQ Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $faqs = $aiContent['faqs'] ?? [];
+    @endphp
+    @if(!empty($faqs))
     <section class="faq-section">
         <div class="container">
-            <h2 class="section-title">أسئلة متكررة (FAQ)</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'أسئلة متكررة' : 'Frequently Asked Questions' }}</h2>
             <div class="faq-list">
+                @foreach($faqs as $faq)
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span>هل التعبئة خاصة ومميزة؟</span>
+                        <span>{{ $faq['question'] ?? '' }}</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </div>
                     <div class="faq-answer">
-                        <p>نعم، جميع المنتجات يتم تعبئتها بشكل خاص ومميز لضمان الخصوصية التامة.</p>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
                     </div>
                 </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>ما هي المقاسات المتاحة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>متوفر بجميع المقاسات من XS إلى XXL لتناسب جميع الأجسام.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>ما هي طرق الدفع المتاحة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نقبل الدفع نقداً عند الاستلام، التحويل البنكي، والبطاقات الائتمانية.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل يمكنني استرداد المبلغ؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، يمكنك استرداد المبلغ خلال 14 يوم من الشراء إذا لم تكن راضية عن المنتج.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Order Form Section -->
     <section class="order-form-section">
@@ -354,12 +192,12 @@ $additionalFonts = '
         <div class="container">
 
             <div class="footer-bottom">
-                <p>Powered by sawa © {{ date('Y') }}</p>
+                <p>Powered by {{ $settings['site_name'] ?? 'DropSaas' }} © {{ date('Y') }}</p>
             </div>
         </div>
     </footer>
 
-    <script src="{{ asset('js/landing-fashion.js') }}"></script>
+    <script src="{{ asset('js/landing-faq-toggle.js') }}"></script>
 </body>
 
 </html>

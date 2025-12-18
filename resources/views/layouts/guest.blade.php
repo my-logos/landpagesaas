@@ -5,18 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $settings['seo_title'] ?? $settings['site_name'] ?? config('app.name', 'sawa') }}</title>
+    <title>{{ $settings['seo_title'] ?? $settings['site_name'] ?? config('app.name', 'DropSaas') }}</title>
     <meta name="description" content="{{ $settings['seo_description'] ?? '' }}">
     <meta name="keywords" content="{{ $settings['seo_keywords'] ?? '' }}">
     <!-- Font Awesome 7 - Latest Version with Colors -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{ asset('css/landing-saas.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/landing-home.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/loading-bar.css') }}">
+    <!-- Main CSS - Unified file containing all styles -->
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     @stack('head')
 </head>
 
-<body class="ls-guest-body">
+<body class="ls-guest-body" data-env="{{ config('app.env', 'local') }}">
     <!-- Navigation for guest pages -->
     <header class="ls-guest-header">
         <div class="ls-guest-nav">
@@ -50,7 +49,7 @@
     <!-- Footer -->
     <footer class="ls-guest-footer">
         <div class="footer-content">
-            <p>&copy; 2025 sawa. {{ \App\Helpers\TranslationHelper::get('messages.footer_rights', 'All rights reserved') }}</p>
+            <p>&copy; 2025 DropSaas. {{ \App\Helpers\TranslationHelper::get('messages.footer_rights', 'All rights reserved') }}</p>
         </div>
     </footer>
 
@@ -58,6 +57,9 @@
         <div class="fab" title="help">?</div>
     </div>
 
+    @if(config('app.env') === 'production')
+    <script src="{{ asset('js/console-disable.js') }}"></script>
+    @endif
     <script src="{{ asset('js/landing-saas.js') }}"></script>
     <script src="{{ asset('js/language-switcher.js') }}"></script>
     <script src="{{ asset('js/loading-bar.js') }}"></script>
@@ -65,6 +67,8 @@
     <script src="{{ asset('js/auth-phone-validation.js') }}"></script>
     @endif
     @stack('scripts')
+    @include('partials.pixels')
+
 </body>
 
 </html>

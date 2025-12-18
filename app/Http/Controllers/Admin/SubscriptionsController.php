@@ -8,6 +8,13 @@ use App\Models\Payment;
 use App\Models\SubscriptionPackage;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\SubscriptionActivated;
+use App\Mail\SubscriptionRenewed;
+use App\Mail\NewSubscriptionNotification;
+use App\Mail\PaymentReceived;
+use App\Mail\WalletTopupNotification;
 
 class SubscriptionsController extends BaseAdminController
 {
@@ -100,6 +107,28 @@ class SubscriptionsController extends BaseAdminController
         // Create transaction
         $this->createPackageTransaction($payment, $package);
 
+        // Send emails
+        try {
+            // Check if this is a renewal
+            $isRenewal = Subscription::where('user_id', $user->id)
+                ->where('id', '!=', $subscription->id)
+                ->where('status', 'expired')
+                ->exists();
+
+            if ($isRenewal) {
+                // Send renewal email to user
+                Mail::to($user->email)->send(new SubscriptionRenewed($user, $subscription, $package));
+            } else {
+                // Send activation email to user (new subscription)
+                Mail::to($user->email)->send(new SubscriptionActivated($user, $subscription, $package));
+            }
+            
+            // Send notification to admins (already sent when payment was created, but send again for approval)
+            $this->sendAdminEmails(new PaymentReceived($payment, $user));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send subscription approval emails', ['error' => $e->getMessage()]);
+        }
+
         return redirect()->back()
             ->with('success', $this->getTranslatedMessage('messages.subscription_approved', 'Subscription approved successfully'));
     }
@@ -151,6 +180,13 @@ class SubscriptionsController extends BaseAdminController
             'description' => 'Wallet top-up via bank transfer',
             'status' => 'paid',
         ]);
+
+        // Send notification to admins (already sent when payment was created, but send again for approval)
+        try {
+            $this->sendAdminEmails(new WalletTopupNotification($payment, $user));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send wallet topup approval email', ['error' => $e->getMessage()]);
+        }
 
         return redirect()->back()
             ->with('success', $this->getTranslatedMessage('messages.wallet_payment_approved', 'Wallet payment approved successfully'));
@@ -346,5 +382,34 @@ class SubscriptionsController extends BaseAdminController
             'totalSales' => $user->orders()->where('status', 'delivered')->sum('total_cents') ?? 0,
             'total_sales' => $user->orders()->where('status', 'delivered')->sum('total_cents') ?? 0,
         ];
+    }
+
+    /**
+     * Send emails to all admin users
+     */
+    protected function sendAdminEmails($mailable): void
+    {
+        $adminEmails = User::where('role', 'admin')
+            ->orWhere(function($query) {
+                if (method_exists($query->getModel(), 'roles')) {
+                    $query->whereHas('roles', function($q) {
+                        $q->where('name', 'admin');
+                    });
+                }
+            })
+            ->pluck('email')
+            ->filter()
+            ->unique();
+
+        foreach ($adminEmails as $email) {
+            try {
+                Mail::to($email)->send($mailable);
+            } catch (\Throwable $e) {
+                Log::error('Failed to send admin email', [
+                    'email' => $email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 }

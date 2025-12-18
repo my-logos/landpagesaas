@@ -2,25 +2,34 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
     <!-- Header -->
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.control_panel') ?? 'لوحة التحكم' }}</h1>
-        <div class="date-range-selector">
-            <form method="GET" action="{{ route('user.orders.statistics') }}" class="date-filter-form">
-                <div class="date-input-group">
-                    <label>{{ $t('messages.date_from') ?? 'التاريخ من:' }}:</label>
-                    <input type="date" name="date_from" class="date-input" value="{{ $dateFrom ?? '' }}" />
-                    <i class="fa-solid fa-calendar date-icon"></i>
-                </div>
-                <div class="date-input-group">
-                    <label>{{ $t('messages.date_to') ?? 'التاريخ إلى:' }}:</label>
-                    <input type="date" name="date_to" class="date-input" value="{{ $dateTo ?? '' }}" />
-                    <i class="fa-solid fa-calendar date-icon"></i>
-                </div>
-                <button type="submit" class="btn-apply-date-filter">
-                    {{ $t('messages.apply') ?? 'تطبيق' }}
-                </button>
-            </form>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.control_panel') ?? 'لوحة التحكم' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <div class="date-range-selector">
+                <form method="GET" action="{{ route('user.orders.statistics') }}" class="date-filter-form">
+                    <div class="date-input-group">
+                        <label>{{ $t('messages.date_from') ?? 'التاريخ من:' }}:</label>
+                        <input type="date" name="date_from" class="date-input" value="{{ $dateFrom ?? '' }}" />
+                        <i class="fa-solid fa-calendar date-icon"></i>
+                    </div>
+                    <div class="date-input-group">
+                        <label>{{ $t('messages.date_to') ?? 'التاريخ إلى:' }}:</label>
+                        <input type="date" name="date_to" class="date-input" value="{{ $dateTo ?? '' }}" />
+                        <i class="fa-solid fa-calendar date-icon"></i>
+                    </div>
+                    <button type="submit" class="btn-apply-date-filter">
+                        {{ $t('messages.apply') ?? 'تطبيق' }}
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -110,4 +119,3 @@
 <script src="{{ asset('js/user-dashboard.js') }}"></script>
 @endpush
 @endsection
-

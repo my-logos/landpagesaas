@@ -1,5 +1,5 @@
 @php
-$templateCss = 'css/landing-watches.css';
+$templateCss = 'landpage/css/landing-watches.css';
 $additionalFonts = '
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@ $additionalFonts = '
     @include('landing-templates.partials.page-features')
     <!-- Top Banner -->
     <div class="top-banner">
-        {{ $page->additional_description ?? 'عرض حصري على اللانجيري! احصلي على خصم فوري، العرض محدود!' }}
+        {{ $page->additional_description ?? '' }}
     </div>
 
     <!-- Hero Section - Classic Refined Design -->
@@ -29,8 +29,12 @@ $additionalFonts = '
                         <span class="label-line"></span>
                     </div>
                     <h1 class="hero-title-refined">{{ $page->title ?? ($page->product->name ?? 'ساعات أنيقة') }}</h1>
+                    @php
+                    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+                    $heroDescription = $aiContent['description'] ?? ($page->product->description ?? '');
+                    @endphp
                     <p class="hero-description-refined">
-                        {{ $page->content ?? ($page->product->description ?? 'اكتشف مجموعتنا المميزة من الساعات الفاخرة. تصميمات أنيقة وجودة عالية.') }}
+                        {{ $heroDescription }}
                     </p>
                     @if($page->product)
                     <div class="pricing-refined">
@@ -80,41 +84,36 @@ $additionalFonts = '
     </section>
 
     <!-- Features Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $features = $aiContent['features'] ?? [];
+    @endphp
+    @if(!empty($features))
+    @php
+    // Limit features to maximum 6 items (3 per row, max 2 rows)
+    $limitedFeatures = array_slice($features, 0, 6);
+    @endphp
     <section class="features-section">
         <div class="container">
-            <h2 class="section-title">لماذا تختار ساعاتنا؟</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'مميزات المنتج' : 'Product Features' }}</h2>
             <div class="features-grid">
+                @foreach($limitedFeatures as $feature)
                 <div class="feature-card">
+                    @if(isset($feature['icon']))
                     <div class="feature-icon">
-                        <i class="fa-solid fa-gem"></i>
+                        <i class="{{ $feature['icon'] }}"></i>
                     </div>
-                    <h3 class="feature-title">جودة فاخرة</h3>
-                    <p class="feature-description">خامات عالية الجودة من أفضل المصادر</p>
+                    @endif
+                    <h3 class="feature-title">{{ $feature['title'] ?? '' }}</h3>
+                    <p class="feature-description">{{ $feature['description'] ?? '' }}</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-palette"></i>
-                    </div>
-                    <h3 class="feature-title">تصميمات عصرية</h3>
-                    <p class="feature-description">تصميمات أنيقة تناسب جميع الأذواق</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h3 class="feature-title">خصوصية تامة</h3>
-                    <p class="feature-description">تعبئة خاصة تضمن الخصوصية الكاملة</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <h3 class="feature-title">تسليم سريع</h3>
-                    <p class="feature-description">تسليم سريع ومحترف لجميع المحافظات</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Product Gallery Section -->
     @if($page->product && $page->product->images)
@@ -281,49 +280,32 @@ $additionalFonts = '
     </section>
 
     <!-- FAQ Section -->
+    @php
+    if (!isset($aiContent)) {
+    $aiContent = is_string($page->content) ? json_decode($page->content, true) : ($page->content ?? []);
+    }
+    $faqs = $aiContent['faqs'] ?? [];
+    @endphp
+    @if(!empty($faqs))
     <section class="faq-section">
         <div class="container">
-            <h2 class="section-title">أسئلة متكررة (FAQ)</h2>
+            <h2 class="section-title">{{ ($aiContent['language'] ?? 'ar') === 'ar' ? 'أسئلة متكررة' : 'Frequently Asked Questions' }}</h2>
             <div class="faq-list">
+                @foreach($faqs as $faq)
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span>هل التعبئة خاصة ومميزة؟</span>
+                        <span>{{ $faq['question'] ?? '' }}</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </div>
                     <div class="faq-answer">
-                        <p>نعم، جميع المنتجات يتم تعبئتها بشكل خاص ومميز لضمان الخصوصية التامة.</p>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
                     </div>
                 </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>ما هي المقاسات المتاحة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>متوفر بجميع المقاسات من XS إلى XXL لتناسب جميع الأجسام.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>ما هي طرق الدفع المتاحة؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نقبل الدفع نقداً عند الاستلام، التحويل البنكي، والبطاقات الائتمانية.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>هل يمكنني استرداد المبلغ؟</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم، يمكنك استرداد المبلغ خلال 14 يوم من الشراء إذا لم تكن راضية عن المنتج.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Order Form Section -->
     <section class="order-form-section">
@@ -350,17 +332,17 @@ $additionalFonts = '
         </div>
     </section>
 
+    <script src="{{ asset('js/landing-faq-toggle.js') }}"></script>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
 
             <div class="footer-bottom">
-                <p>Powered by sawa © {{ date('Y') }}</p>
+                <p>Powered by {{ $settings['site_name'] ?? 'DropSaas' }} © {{ date('Y') }}</p>
             </div>
         </div>
     </footer>
-
-    <script src="{{ asset('js/landing-watches.js') }}"></script>
 </body>
 
 </html>

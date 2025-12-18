@@ -10,7 +10,11 @@ use App\Models\FacebookConversionAPISetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Mail\NewOrderNotification;
+use App\Mail\OrderSuccessNotification;
 
 class PageViewController extends Controller
 {
@@ -222,18 +226,6 @@ class PageViewController extends Controller
                 $customerData['session_id'] = $sessionId;
             }
 
-            // Add location data if enabled - DISABLED TEMPORARILY to speed up order processing
-            // Location can be added later via background job if needed
-            // if ($includeLocation) {
-            //     try {
-            //         $city = $this->getLocationFromIP($ipAddress);
-            //         if ($city) {
-            //             $customerData['city'] = $city;
-            //         }
-            //     } catch (\Exception $e) {
-            //         \Log::debug('Failed to get location for order', ['ip' => $ipAddress]);
-            //     }
-            // }
 
             // Add device type if enabled
             if ($includeDeviceType) {
@@ -287,18 +279,6 @@ class PageViewController extends Controller
                 $customerData['session_id'] = $sessionId;
             }
 
-            // Add location data if enabled - DISABLED TEMPORARILY to speed up order processing
-            // Location can be added later via background job if needed
-            // if ($includeLocation) {
-            //     try {
-            //         $city = $this->getLocationFromIP($ipAddress);
-            //         if ($city) {
-            //             $customerData['city'] = $city;
-            //         }
-            //     } catch (\Exception $e) {
-            //         \Log::debug('Failed to get location for order', ['ip' => $ipAddress]);
-            //     }
-            // }
 
             // Add device type if enabled
             if ($includeDeviceType) {
@@ -357,22 +337,29 @@ class PageViewController extends Controller
             $smartCouponsEnabled = $settings['smart_coupons_enabled'] ?? false;
             $originalPrice = $product->price_cents ?? 0;
             $shippingPrice = $product->shipping_price_cents ?? 0;
-            $basePrice = $originalPrice + $shippingPrice; // السعر + الشحن (الإجمالي)
+            // Calculate base price: original price + shipping
+            $basePrice = $originalPrice + $shippingPrice;
 
             if ($smartCouponsEnabled) {
-                // إضافة 25% على الإجمالي (السعر + الشحن)
+                // Smart Coupons Pricing Logic:
+                // Step 1: Increase base price by 25% to show a higher "original" price
                 $increasedPrice = $basePrice * 1.25;
-                // خصم 20% من السعر بعد الزيادة ليعيد السعر للإجمالي الأصلي
+
+                // Step 2: Calculate 20% discount from the increased price
+                // This brings the price back to the original base price
+                // Formula: (basePrice * 1.25) * 0.20 = basePrice * 0.25
+                // Result: (basePrice * 1.25) - (basePrice * 0.25) = basePrice
                 $discountAmount = $increasedPrice * 0.20;
-                $finalPrice = $increasedPrice - $discountAmount; // يجب أن يساوي $basePrice
-                // السعر النهائي للوحدة الواحدة = الإجمالي الأصلي (السعر + الشحن)
+                $finalPrice = $increasedPrice - $discountAmount; // Should equal $basePrice
+
+                // Final unit price equals the original base price (product + shipping)
                 $unitPrice = $basePrice;
             } else {
-                // بدون smart coupons، استخدم سعر المنتج فقط
+                // Without smart coupons, use product price only (exclude shipping in unit price)
                 $unitPrice = $originalPrice;
             }
 
-            // حساب الإجمالي = السعر للوحدة × الكمية
+            // Calculate total: unit price × quantity
             $totalCents = $unitPrice * $quantity;
             \Log::info('Price calculated', ['total_cents' => $totalCents, 'unit_price' => $unitPrice]);
 
@@ -404,6 +391,36 @@ class PageViewController extends Controller
 
             // Send webhook event for new order
             $this->sendWebhookEvent('order_received', $order, $page, $product, $customerData);
+
+            // Load order relationships for email
+            $order->load(['user', 'product', 'landingPage']);
+
+            // Send email notification to store owner
+            if ($order->user) {
+                try {
+                    Mail::to($order->user->email)->send(new NewOrderNotification($order, $order->user));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send new order notification email to store owner', [
+                        'order_id' => $order->id,
+                        'user_id' => $order->user_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // Send email notification to customer if email is provided
+            $customerEmail = $customerData['email'] ?? null;
+            if ($customerEmail) {
+                try {
+                    Mail::to($customerEmail)->send(new OrderSuccessNotification($order));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send order success notification email to customer', [
+                        'order_id' => $order->id,
+                        'customer_email' => $customerEmail,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
 
             // Redirect to thank you page
             \Log::info('Redirecting to thank you page', ['order_id' => $order->id]);
@@ -493,6 +510,12 @@ class PageViewController extends Controller
             $landingPage = Page::find($order->landing_page_id);
         }
 
+        // Check if there are existing messages for this order
+        $existingMessage = \App\Models\Message::where('order_number', $order->order_number)
+            ->orWhere('order_id', $order->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
         $locale = app()->getLocale();
         $dir = $locale === 'ar' ? 'rtl' : 'ltr';
 
@@ -506,7 +529,8 @@ class PageViewController extends Controller
             'dir',
             'size',
             'color',
-            'landingPage'
+            'landingPage',
+            'existingMessage'
         ));
     }
 
@@ -552,9 +576,12 @@ class PageViewController extends Controller
             ];
 
             // Get first image
-            if ($product->images) {
-                $images = json_decode($product->images);
-                $productData['first_image'] = $images[0] ?? null;
+            if ($product->images && is_array($product->images)) {
+                $productData['first_image'] = $product->images[0] ?? null;
+            } elseif ($product->images && is_string($product->images)) {
+                // Fallback: if images is still a string, decode it
+                $images = json_decode($product->images, true);
+                $productData['first_image'] = is_array($images) ? ($images[0] ?? null) : null;
             }
 
             // Find page for this product
@@ -580,6 +607,12 @@ class PageViewController extends Controller
             $landingPage = Page::find($order->landing_page_id);
         }
 
+        // Check if there are existing messages for this order
+        $existingMessage = \App\Models\Message::where('order_number', $order->order_number)
+            ->orWhere('order_id', $order->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
         $locale = app()->getLocale();
         $dir = $locale === 'ar' ? 'rtl' : 'ltr';
 
@@ -592,7 +625,8 @@ class PageViewController extends Controller
             'additionalSalesEnabled',
             'size',
             'color',
-            'landingPage'
+            'landingPage',
+            'existingMessage'
         ));
     }
 
@@ -627,19 +661,26 @@ class PageViewController extends Controller
         $finalPrice = $originalPrice;
 
         if ($smartCouponsEnabled && $page->product) {
-            // إضافة 25% على الإجمالي (السعر + الشحن)
+            // Smart Coupons Pricing Logic:
+            // Increase base price by 25% to create "original" price illusion
             $increasedPrice = $basePrice * 1.25;
-            // خصم 20% من السعر بعد الزيادة ليعيد السعر للإجمالي الأصلي
+
+            // Apply 20% discount to bring price back to original base price
+            // Mathematical proof: (basePrice * 1.25) - (basePrice * 1.25 * 0.20) = basePrice
             $discountAmount = $increasedPrice * 0.20;
-            $finalPrice = $increasedPrice - $discountAmount; // يجب أن يساوي $basePrice
+            $finalPrice = $increasedPrice - $discountAmount; // Should equal $basePrice
+
             $displayPrice = $finalPrice;
-            $discountPercent = 25;
+            $discountPercent = 25; // Show 25% discount to customer
         } else {
-            // بدون smart coupons، حساب خصم مختلف حسب template
-            // Default discount is 25% (0.75), but some templates use 0.77, 0.80, 0.85
-            $discountMultiplier = 0.75; // Default
+            // Without smart coupons: apply template-specific discount multiplier
+            // Default discount is 25% (0.75 multiplier)
+            // Some templates may use different multipliers: 0.77, 0.80, 0.85
+            $discountMultiplier = 0.75; // Default 25% discount
             $finalPrice = $originalPrice * $discountMultiplier;
             $displayPrice = $finalPrice;
+
+            // Calculate actual discount percentage for display
             $discountPercent = round((($originalPrice - $finalPrice) / $originalPrice) * 100);
         }
 
@@ -770,14 +811,14 @@ class PageViewController extends Controller
                 "availability" => "https://schema.org/InStock",
                 "seller" => [
                     "@type" => "Organization",
-                    "name" => $page->user->name ?? 'Sawa'
+                    "name" => $page->user->name ?? 'DropSaas'
                 ]
             ];
         }
 
         $schema["brand"] = [
             "@type" => "Brand",
-            "name" => $page->user->name ?? 'Sawa'
+            "name" => $page->user->name ?? 'DropSaas'
         ];
 
         return $schema;
@@ -881,7 +922,8 @@ class PageViewController extends Controller
                 return;
             }
 
-            // Get user's Facebook Conversion API settings - هذه الإعدادات مربوطة تلقائياً بجميع صفحات الهبوط لنفس user_id
+            // Get user's Facebook Conversion API settings
+            // These settings are automatically linked to all landing pages for the same user_id
             $settings = FacebookConversionAPISetting::getForUser($pageOwner->id);
 
             // Check if Facebook Conversion API is enabled
@@ -923,7 +965,7 @@ class PageViewController extends Controller
             $userData['fbc'] = $request->cookie('_fbc');
             $userData['fbp'] = $request->cookie('_fbp');
 
-            // Prepare order data - استخدام العملة من الإعدادات أو من الطلب
+            // Prepare order data - Use currency from settings or fallback to order currency
             $orderData = [
                 'currency' => $currency ?? ($order->currency ?? 'EGP'),
                 'value' => ($order->total_cents ?? 0) / 100,
@@ -934,7 +976,8 @@ class PageViewController extends Controller
                 'event_source_url' => $request->url(),
             ];
 
-            // Send event - الإعدادات مربوطة تلقائياً بجميع صفحات الهبوط لنفس user_id
+            // Send conversion event to Facebook
+            // Settings are automatically linked to all landing pages for the same user_id
             $service = new FacebookConversionAPIService();
             $service->sendPurchaseEvent($pixelId, $accessToken, $orderData, $userData, $testEventCode);
         } catch (\Exception $e) {

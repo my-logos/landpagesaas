@@ -1,10 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="subscription-plans-page" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="page-title">{{ $t('messages.plans') }}</h1>
-        <a href="{{ route('admin.packages.create') }}" class="btn-save">{{ $t('messages.add_new') ?? 'Add New' }}</a>
+<div class="subscription-plans-page user-dashboard" dir="{{ $dir }}">
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">{{ $t('messages.plans') ?? 'الخطط' }}</h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.packages.create') }}" class="btn btn-primary">{{ $t('messages.add_new') ?? 'إضافة جديد' }}</a>
+        </div>
     </div>
 
     <!-- Available Plans -->

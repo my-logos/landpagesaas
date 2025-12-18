@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $t('messages.additional_settings') ?? 'Additional Settings' }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $t('messages.additional_settings') ?? 'Additional Settings' }}</h1>
     </div>
 
     <div class="ls-card">
@@ -201,8 +201,8 @@
                 </div>
             </div>
 
-            <div class="form-actions" style="display: flex; justify-content: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #e0e0e0;">
-                <button type="submit" class="btn btn-primary" style="min-width: 150px; padding: 12px 24px; font-size: 16px;">{{ $t('messages.save') ?? 'Save' }}</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">{{ $t('messages.save') ?? 'Save' }}</button>
             </div>
         </form>
     </div>

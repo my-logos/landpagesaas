@@ -2,7 +2,9 @@
 
 @section('content')
 <div class="subscription-plans-page" dir="{{ $dir }}">
-  <h1 class="page-title">{{ $t('messages.subscription_plans') }}</h1>
+  <div class="page-header">
+    <h1 class="page-title">{{ $t('messages.subscription_plans') }}</h1>
+  </div>
   <h2 class="section-title">{{ $t('messages.your_current_plan') }}</h2>
 
   <!-- Current Usage and Plan Cards -->
@@ -100,6 +102,7 @@
         <li><i class="fa-solid fa-check"></i> {{ ($package->daily_orders_limit !== null) ? $package->daily_orders_limit : $t('messages.unlimited') }} {{ $t('messages.edits_per_day') }}</li>
         <li><i class="fa-solid fa-check"></i> {{ ($package->monthly_orders_limit !== null) ? $package->monthly_orders_limit : $t('messages.unlimited') }} {{ $t('messages.requests_per_day') }}</li>
         <li><i class="fa-solid fa-check"></i> {{ ($package->monthly_orders_limit !== null) ? $package->monthly_orders_limit : $t('messages.unlimited') }} {{ $t('messages.requests_per_month') }}</li>
+        <li><i class="fa-solid fa-check"></i> {{ ($package->monthly_support_tickets_limit !== null && $package->monthly_support_tickets_limit > 0) ? $package->monthly_support_tickets_limit : $t('messages.unlimited') }} {{ $t('messages.support_tickets_per_month') ?? 'Support Tickets per Month' }}</li>
         @if($package->hasFeature('google_analytics'))
         <li><i class="fa-solid fa-check"></i> {{ $locale === 'ar' ? 'Google Analytics' : 'Google Analytics' }}</li>
         @endif
@@ -277,13 +280,13 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn-close">{{ $t('messages.close') ?? 'Close' }}</button>
+      <button type="button" class="btn">{{ $t('messages.close') ?? 'Close' }}</button>
     </div>
   </div>
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-packages.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

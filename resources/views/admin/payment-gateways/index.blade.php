@@ -2,15 +2,25 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">
-            <i class="fa-solid fa-credit-card"></i>
-            {{ $t('messages.payment_gateways') ?? 'Payment Gateways' }}
-        </h1>
-        <a href="{{ route('admin.payment-gateways.create') }}" class="btn-save">
-            <i class="fa-solid fa-plus"></i>
-            {{ $t('messages.add_new') ?? 'Add New' }}
-        </a>
+    <!-- Control Panel Section -->
+    <div class="control-panel-section">
+        <h2 class="control-panel-title">{{ $t('messages.control_panel') ?? 'Control Panel' }}</h2>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="fa-solid fa-credit-card"></i>
+                {{ $t('messages.payment_gateways') ?? 'بوابات الدفع' }}
+            </h1>
+        </div>
+        <div class="page-header-right">
+            <a href="{{ route('admin.payment-gateways.create') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                {{ $t('messages.add_new') ?? 'إضافة جديد' }}
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -100,7 +110,7 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-payment-gateways.css') }}">
+<!-- Styles included in main.css -->
 @endpush
 
 @push('scripts')

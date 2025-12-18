@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="user-dashboard" dir="{{ $dir }}">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">{{ $package->exists ? ($t('messages.edit') ?? 'Edit') : ($t('messages.add_new') ?? 'Add New') }} - {{ $t('messages.plans') ?? 'Package' }}</h1>
+    <div class="page-header">
+        <h1 class="page-title">{{ $package->exists ? ($t('messages.edit') ?? 'Edit') : ($t('messages.add_new') ?? 'Add New') }} - {{ $t('messages.plans') ?? 'Package' }}</h1>
     </div>
 
     <div class="ls-card">
@@ -52,6 +52,11 @@
             <div class="form-group">
                 <label for="monthly_orders_limit" class="form-label">{{ $t('messages.monthly_orders') ?? 'Monthly Orders' }} {{ $t('messages.limit') ?? 'Limit' }}</label>
                 <input type="number" id="monthly_orders_limit" name="monthly_orders_limit" value="{{ old('monthly_orders_limit', $package->monthly_orders_limit) }}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="monthly_support_tickets_limit" class="form-label">{{ $t('messages.monthly_support_tickets') ?? 'Monthly Support Tickets' }} {{ $t('messages.limit') ?? 'Limit' }}</label>
+                <input type="number" id="monthly_support_tickets_limit" name="monthly_support_tickets_limit" value="{{ old('monthly_support_tickets_limit', $package->monthly_support_tickets_limit) }}" class="form-control" />
+                <small>{{ $t('messages.monthly_support_tickets_hint') ?? 'Leave blank or 0 for unlimited' }}</small>
             </div>
 
             <h3>{{ $t('messages.package_features') ?? 'Package Features' }}</h3>
